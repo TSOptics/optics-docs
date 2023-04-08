@@ -2,10 +2,10 @@
 sidebar_position: 2
 ---
 
-import MdxImage from '../../src/components/Image';
-import Counter from '../../src/components/getting-started/Counter';
-import Counters from '../../src/components/getting-started/Counters';
-import CountersWithStep from '../../src/components/getting-started/CountersWithStep';
+import MdxImage from "../../src/components/Image";
+import Counter from "../../src/components/getting-started/Counter";
+import Counters from "../../src/components/getting-started/Counters";
+import CountersWithStep from "../../src/components/getting-started/CountersWithStep";
 
 # Getting Started
 
@@ -36,13 +36,13 @@ The first step is to create a store by calling `createStore` and passing it an i
 It returns an **optic** focusing on the store.
 
 ```tsx
-import { createStore } from 'react-optics';
+import { createStore } from "react-optics";
 
 const onState = createStore({
-    counters: {
-        counterA: { value: 0, step: 1 },
-        counterB: { value: 0, step: 2 }
-    }
+  counters: {
+    counterA: { value: 0, step: 1 },
+    counterB: { value: 0, step: 2 },
+  },
 });
 ```
 
@@ -60,22 +60,22 @@ Let the **code completion** guide you !
 Just call the hook `useOptic` with your optic ! It returns the focused value and a setter just like React's `useState`.
 
 ```tsx title=Counter.tsx
-import { useOptic } from 'react-optics';
+import { useOptic } from "react-optics";
 
 const Counter = () => {
-    const [counterValue, setCounterValue] = useOptic(onValueA);
+  const [counterValue, setCounterValue] = useOptic(onValueA);
 
-    return (
-        <div>
-            <button onClick={() => setCounterValue((prev) => prev + 1)}>
-                increment
-            </button>
-            {counterValue}
-            <button onClick={() => setCounterValue((prev) => prev - 1)}>
-                decrement
-            </button>
-        </div>
-    );
+  return (
+    <div>
+      <button onClick={() => setCounterValue((prev) => prev + 1)}>
+        increment
+      </button>
+      {counterValue}
+      <button onClick={() => setCounterValue((prev) => prev - 1)}>
+        decrement
+      </button>
+    </div>
+  );
 };
 ```
 
@@ -133,28 +133,24 @@ To access it in our component let's change some things.
 Instead of passing to our `Counter` component an optic focusing on the value let's take a step back and focus on the complete counter instead. We will then focus on the value and the step separately in the component.
 
 ```tsx file=Counter.tsx {4-5,12-16}
-import { useOptic } from 'react-optics';
+import { useOptic } from "react-optics";
 
 const Counter = ({ onCounter }) => {
-    const [value, setValue] = useOptic(onCounter.focus('value'));
-    const [step, setStep] = useOptic(onCounter.focus('step'));
+  const [value, setValue] = useOptic(onCounter.focus("value"));
+  const [step, setStep] = useOptic(onCounter.focus("step"));
 
-    return (
-        <div>
-            <button onClick={() => setValue((prev) => prev + step)}>
-                increment
-            </button>
-            {value}
-            <button onClick={() => setValue((prev) => prev - step)}>
-                decrement
-            </button>
-            <input
-                type="number"
-                value={step}
-                onChange={(event) => setStep(event.target.valueAsNumber)}
-            />
-        </div>
-    );
+  return (
+    <div>
+      <button onClick={() => setValue((prev) => prev + step)}>increment</button>
+      {value}
+      <button onClick={() => setValue((prev) => prev - step)}>decrement</button>
+      <input
+        type="number"
+        value={step}
+        onChange={(event) => setStep(event.target.valueAsNumber)}
+      />
+    </div>
+  );
 };
 ```
 

@@ -4,31 +4,20 @@ sidebar_position: 1
 
 # Motivation
 
-In React centralizing the state in a **global store** outside of the component tree is a common practice as it makes it possible to read and update this state from anywhere in the app in a performant and predictable way.  
-However this extremely valuable pattern comes with two significant drawbacks that hurt our ability to scale.
+The use of immutable state in web applications has grown in popularity in recent years in a large part due to the fact that immutability helps us track changes in our application’s state, a trait that is used by React (among others) in its rendering strategy.
+But the perks of immutability don’t end at UI libraries: it also makes it trivial to implement features based on history, like undo/redo or reset and, overall, immutability makes our code more predictable, composable, testable and easier to reason about when compared to uncontrolled mutability. As a consequence immutability and functional programming in general has never been more popular in the world of JavaScript application development.
 
--   First thing is **immutability**: React relies on reference change to render so we cannot mutate our state but have to create a new version of it each time we make a change.  
-    However these immutable updates are notoriously verbose and error-prone in Javascript. In a non trivial app the global state will most likely be several level deep, making the update logic littered with the **spread operator pyramid of doom**.
-    A workaround consists of getting rid of nested state by [**normalizing it**](https://beta.reactjs.org/learn/choosing-the-state-structure#avoid-deeply-nested-state) and using joins to make queries. However it feels more idiomatic to SQL than it is to Javascript and makes it easier to introduce bugs and performance issues to the state access/update logic.  
-    Another option is to use Immer as it allows us to deal with immutable updates while keeping the state structure untouched, but it introduces a kind of cognitive dissonance where we have to knowingly break the rules we have understood and applied for years, while trusting the library to unbreak them with Proxy magic.
+However the language wasn’t built around it and the ergonomics of immutability are often significantly worse than using a mutative approach to state.
 
--   The other issue, arguably the most problematic, is **coupling**: when a component subscribes to a store it creates a **hard dependency** between itself and the piece of global state returned by the selector.  
-    Normally a component receives external state via its props, that’s what makes it composable and allows it to be easily reused and tested in isolation.  
-    All that’s needed to adapt the component to a new context is to pass different props to it; it’s this inherent composability that makes component based frameworks like React so powerful.  
-    But it all breaks down when subscribing to a store, now the component has a dependency to this external piece of state that is not parameterized via the props and consequently can’t be changed;
-    reusability and testability are thrown out the window.  
-    We have to resort to split the component into multiple ones with container components managing the state access and a presentational component receiving the data as props from the containers.  
-    Repeat the process for each component accessing the global state in the app and it all starts to feel like we’re not properly using React anymore.
+First updating immutable state is hard, and it gets worse as our state grows over time. We have to make a shallow copy of every level up to the part we want to update. It drowns the signal in noise and makes it easy to introduce accidental mutations in the process, causing particularly hard to track bugs.
+Another, possibly more problematic, issue is that composing immutable states together is hard:
+In most non trivial applications tree-like structures are not enough and we need to represent our state as a graph, with relations between entities.
+But unfortunately we can’t just use references to represent such relations and doing so will only lead to accidental duplication.
+What’s often done to alleviate these issues is forcefully flattening and _normalizing_ the state, where relations are represented with ids from other entities.
+To consume it we then need to manually _denormalize_ the state, by performing what’s essentially a poor man’s SQL join operation without a query language and without the help of the type system.
 
-Well it turns out we can have our cake and eat it, keeping our nested state without introducing coupling while making immutable updates as easy as mutating in-place.  
-That’s where **Optics** come in.
-As a composable pair of getter and setter, an optic focuses on a part of the state and allows us to read and update just this part, without the pains of hand written immutable updates.  
-We can then make our component take an optic as a prop and just like that we **parameterized** its global state access and solved our coupling problem !
+The goal for this library is to bridge the ergonomics gap with mutable state while keeping the props of immutability, by bringing a concept from functional programming called Optics, and adapting it to the state management needs of modern TypeScript applications.
+An Optic is a reference on a piece of immutable state, allowing you to read and update it but also to decompose it in smaller optics and compose them with other ones referencing different pieces of state.
+They solve our previous issues by making it natural to represent complex state graphs and easy to update any deeply nested value, they also help us decoupling our components from our application’s global state.
 
-But Optics are much more than just the solution to our previously mentioned issues.  
-While we can have relatively simple optics like just focusing on a specific field from a path, they are flexible enough to express complex data access with conditions or conversions, generalizing to multiple targets, filtering them and focusing back to a single value.  
-In the end Optics are a bit like components in some ways: small composable units that can be flexibly arranged in many ways to express complex requirements. That's what makes them ideal for state management in React, we can compose them simultaneously with our components.
-
-:::tip _it's all functions_
-This adequacy of Optics with React is maybe not that surprising considering they both have their roots in functional programming !
-:::
+Optics are syntactically lightweight, performant and type-safe. Just like components they are small composable units that are meant to help your application scale.
