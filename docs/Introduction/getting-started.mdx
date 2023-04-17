@@ -6,182 +6,258 @@ import MdxImage from "../../src/components/Image";
 import Counter from "../../src/components/getting-started/Counter";
 import Counters from "../../src/components/getting-started/Counters";
 import CountersWithStep from "../../src/components/getting-started/CountersWithStep";
+import CodeBlock from "@theme/CodeBlock";
+import Admonition from "@theme/Admonition";
 
 # Getting Started
 
-**react-optics** is a state management library for React that uses structures called **optics** to focus on slices of your store.  
-Optics make reading and updating these slices easy. You can **compose** optics to go deeper in your store !
+**Optics** is a library to manage global immutable state in TypeScript applications.
 
-**react-optics** is lightweight (> 2kB), unopinionated, typesafe and strives to feel like a natural extension of React.
+It let's you declare **references** to parts of your state, called **optics**, that allow you to **read** and **update** these parts as well as **subscribe** to their changes.
+
+**@Optics** is lightweight, unopinionated and typesafe.  
+The core is framework agnostic and we will eventually ship adapters to other frameworks.
 
 ## Requirements
 
-react-optics requires **React** `16.3` or higher.
-
-**TypeScript** is optional but strongly recommended (version `4.1` or higher, strict mode).
+`@optics/react` requires **React 18** or higher and **TypeScript 4.1** or higher.
 
 ## Installation
 
 ```bash npm2yarn
-npm install react-optics
+npm install @optics/react
 ```
 
 ## Basic example
 
-No state management documentation is truly complete without a simple counter as an example, so let's get started:
+### Creating a state
 
-### Creating the store
+In our application let's start by creating a state holding a list of users.
+For that let's call `createState` and pass it an initial value.
 
-The first step is to create a store by calling `createStore` and passing it an initial value.  
-It returns an **optic** focusing on the store.
+```ts
+import { createState } from "@optics/react";
 
-```tsx
-import { createStore } from "react-optics";
+type User = {
+  name: string;
+  age: number;
+  address: {
+    city: string;
+    street: {
+      name: string;
+      number: number;
+    };
+  };
+};
 
-const onState = createStore({
-  counters: {
-    counterA: { value: 0, step: 1 },
-    counterB: { value: 0, step: 2 },
+const onUsers = createState([
+  {
+    name: "John",
+    age: 42,
+    address: { city: "New York", street: { name: "5th Avenue", number: 940 } },
   },
-});
+]);
+// onUsers: Optic<User[]>
 ```
 
-Here the optic `onState` focuses on the root of your store.
-
-### Focusing
-
-To get the optic focusing on the value in counterA, call `focus` on the optic `onState` with the right path.  
-Let the **code completion** guide you !
-
-<MdxImage src="path-completion-light.png" srcDark="path-completion-dark.png" />
-
-### Using the optic in a component
-
-Just call the hook `useOptic` with your optic ! It returns the focused value and a setter just like React's `useState`.
-
-```tsx title=Counter.tsx
-import { useOptic } from "react-optics";
-
-const Counter = () => {
-  const [counterValue, setCounterValue] = useOptic(onValueA);
-
-  return (
-    <div>
-      <button onClick={() => setCounterValue((prev) => prev + 1)}>
-        increment
-      </button>
-      {counterValue}
-      <button onClick={() => setCounterValue((prev) => prev - 1)}>
-        decrement
-      </button>
-    </div>
-  );
-};
-```
-
-<Counter />
-
-#
-
-The setter returned by `useOptic` allows you to change `counterValue`
-just like it was local state, you don't need to worry that it's part of a complex
-store object.
-
-And that's it !
-
-### Optics as props
-
-Don't we also have a counterB in our store ?  
-Let's change things up and make our component `Counter` take an optic as a prop instead of directly referencing `onValueA`.
-
-```tsx title=Counter.tsx
-import { useOptic } from "react-optics";
-
-const Counter = ({ onCounterValue }) => {
-  const [counterValue, setCounterValue] = useOptic(onCounterValue);
-
-  ...
-};
-```
-
-Now we can call two instances of `Counter`, each with its own optic, focusing on its own part of the state.
-
-```tsx title=Counters.tsx {3-4,11-12}
-import { useOptic } from "react-optics";
-
-const onValueA = onState.focus("counters.counterA.value");
-const onValueB = onState.focus("counters.counterB.value");
-
-const Counters = () => {
-  const [counters] = useOptic(onState.focus("counters"));
-  return (
-    ...
-      sum = {counters.counterA.value + counters.counterB.value}
-      <Counter onCounterValue={onValueA} />
-      <Counter onCounterValue={onValueB} />
-    ...
-  );
-};
-```
-
-<Counters />
-
-## Bonus
-
-In our store we also defined a `step` attribute for both counters.
-To access it in our component let's change some things.  
-Instead of passing to our `Counter` component an optic focusing on the value let's take a step back and focus on the complete counter instead. We will then focus on the value and the step separately in the component.
-
-```tsx file=Counter.tsx {4-5,12-16}
-import { useOptic } from "react-optics";
-
-const Counter = ({ onCounter }) => {
-  const [value, setValue] = useOptic(onCounter.focus("value"));
-  const [step, setStep] = useOptic(onCounter.focus("step"));
-
-  return (
-    <div>
-      <button onClick={() => setValue((prev) => prev + step)}>increment</button>
-      {value}
-      <button onClick={() => setValue((prev) => prev - step)}>decrement</button>
-      <input
-        type="number"
-        value={step}
-        onChange={(event) => setStep(event.target.valueAsNumber)}
-      />
-    </div>
-  );
-};
-```
-
-```tsx file=Counters.tsx {3-4,11-12}
-import { useOptic } from "react-optics";
-
-const onCounterA = onState.focus("counters.counterA");
-const onCounterB = onState.focus("counters.counterB");
-
-const Counters = () => {
-  const [counters] = useOptic(onState.focus("counters"));
-  return (
-    ...
-      sum: {counters.counterA.value + counters.counterB.value}
-      <Counter onCounter={onCounterA} />
-      <Counter onCounter={onCounterB} />
-    ...
-  );
-};
-```
-
-<CountersWithStep />
-
-#
-
-As you can see optics are very flexible, you can compose them in many ways.  
-Passing them down your components hierarchy as props works very well. It feels just like passing down properties of a plain js object but instead it's a global reactive store !
-
-#
+`createState` returns an **optic**.  
+An optic is a **reference** to a piece of application state and it allows us to read and update this piece.
 
 :::tip
-In the this example the next value is computed from two pieces of state (the previous value and step).  
-If you are thinking [**reducer**](<../API/hooks/useOpticReducer()>) you'd be right !
+You're not restricted to a single global state, you can call `createState` as many times as want.
 :::
+
+### Using optics
+
+- Calling `get` on the optic let's us read the state:
+
+```ts
+onUsers.get(); // [{ name: "John", age: 42, address: { ... } }]
+```
+
+- Calling `set` on the optic let's us update the state:
+
+```ts
+// adds a new user
+onUsers.set((prev) => [
+  ...prev,
+  {
+    name: "Jane",
+    age: 32,
+    address: { city: "Paris", street: { name: "Rue de Rivoli", number: 1 } },
+  },
+]);
+
+onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jane", age: 32, address: { ... } }]
+```
+
+### Deriving new optics
+
+Where it gets interesting is that, from this base optic, you can get new ones focused on different parts of your state !
+
+For exemple let's get an optic that focuses on the city of the first user is our list:
+
+```ts
+const onCity = onUsers[0].address.city;
+// onCity: Optic<string>
+```
+
+:::tip
+Deriving a new optic looks just like accessing properties of an object !  
+You get the same **type-safety and code completion** in your editor as with plain objects.
+:::tip
+
+Now we can directly read and update the city of the first user thanks to our new optic:
+
+```ts
+onCity.get(); // "New York"
+
+onCity.set("Boston");
+
+onCity.get(); // "Boston"
+```
+
+<details>
+  <summary>
+    Let's compare that with the manual way of updating immutable data:
+  </summary>
+  <CodeBlock language="ts">
+    {`
+// 😵‍💫
+onUsers.set((prev) => [
+  {
+    ...prev[0],
+    address: {
+      ...prev[0].address,
+      city: "Boston",
+    },
+  },
+  ...prev.slice(1),
+]);
+`}
+
+  </CodeBlock>
+<Admonition type="tip">
+Using optics saves us from quite the boilerplate when updating deeply nested data !
+</Admonition>
+</details>
+
+Optics allows you to focus on **narrower parts of your state**, allowing you to read and update these parts independently of the rest.
+
+More examples:
+
+```ts
+onUsers[0].address.city.get(); // "New York"
+
+const onJaneStreet = onUsers[1].address.street;
+// onJaneStreet: Optic<{ name: string; number: number; }>
+
+onJaneStreet.number.set(42);
+
+onJaneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
+```
+
+### Usage in components
+
+Your React components can subscribe to an optic and re-render when the focused state changes.
+
+Pass an optic to the `useOptic` hook, just like React's `useState` it will return a tuple with the current value and a setter.
+
+```tsx title=StreetForm.tsx
+import { useOptic } from "@optics/react";
+
+const StreetForm = () => {
+  const [street, setStreet] = useOptic(onJaneStreet);
+
+  return (
+    <div>
+      Street
+      <label>
+        number:
+        <input
+          value={street.number}
+          type="number"
+          onChange={(e) =>
+            setStreet((prev) => ({ ...prev, number: e.target.value }))
+          }
+        />
+      </label>
+      <label>
+        name:
+        <input
+          value={street.name}
+          onChange={(e) =>
+            setStreet((prev) => ({ ...prev, name: e.target.value }))
+          }
+        />
+      </label>
+    </div>
+  );
+};
+```
+
+<details>
+  <summary>
+    Alternative <code>onChange</code>:
+  </summary>
+  <CodeBlock language="tsx">
+    {`
+onChange={(e) =>
+  onJaneStreet.name.set(e.target.value);
+}
+  `}
+  </CodeBlock>
+  <Admonition type="tip">
+    If you're updating only a subset of the focused data, then instead of using
+    the setter let's focus on that subset and call <code>set</code> on it !
+  </Admonition>
+</details>
+
+<br />
+
+The component will re-render when the street changes, whether it is changed from within the component or from another part of the application.
+
+```ts
+// outside the component
+onJaneStreet.number.set((prev) => prev + 1);
+// StreetFrom will re-render
+```
+
+However the component will not re-render if an unrelated part of the state changes.
+
+```ts
+onJane.age.set((prev) => prev + 1);
+// jane's street reference hasn't changed, StreetForm won't re-render
+```
+
+### Pass optics in props
+
+Instead of referencing the optic directly, the component could accept one **via its props**.
+
+```tsx title=StreetForm.tsx
+import { useOptic, Optic } from "@optics/react";
+
+interface Props {
+  onStreet: Optic<{ name: string; number: number }>;
+}
+
+const StreetForm = ({ onStreet }: Props) => {
+  const [street, setStreet] = useOptic(onStreet);
+  // ...
+};
+```
+
+Now `StreetForm` isn't **coupled** to a specific part of the state anymore, it can take **any optic** focused on a street.
+
+```tsx
+// Form for john's streeet
+<StreetForm onStreet={onUsers[0].address.street}/>
+
+// Form for jane's street
+<StreetForm onStreet={onUsers[1].address.street}/>
+```
+
+## Next steps
+
+Now you know the basics and can start to use optics effectively, but that's not all there is to it.  
+We suggest you go through the [**core concepts**](./core-concepts) to have a better grasp of the notions introduced here and learn about optic composition.
