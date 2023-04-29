@@ -1,5 +1,5 @@
 ---
-title: Mapped optics
+title: map/reduce
 sidebar_position: 2
 ---
 
@@ -23,9 +23,9 @@ You can get a mapped optic from an optic focused on an array (by calling `.map()
 
 ```ts
 const onClientValidation = createStore<Record<string, boolean>>({
-    Giuseppe: false,
-    GianLuigi: true,
-    Alessandra: false
+  Giuseppe: false,
+  GianLuigi: true,
+  Alessandra: false,
 });
 
 const onValidation = onClientValidation.values(); // Optic<boolean, mapped>
@@ -41,12 +41,12 @@ Once you have a mapped optic you can continue to focus further on the elements, 
 
 ```ts
 const onNationalParks = createStore([
-    { name: 'Denali', squareKilometers: 19185.8 },
-    { name: 'Redwood', squareKilometers: 562.5 },
-    { name: 'Yellowstone', squareKilometers: 8983.2 }
+  { name: "Denali", squareKilometers: 19185.8 },
+  { name: "Redwood", squareKilometers: 562.5 },
+  { name: "Yellowstone", squareKilometers: 8983.2 },
 ]).map(); // Optic<{ name: string; squareKilometers: number }, mapped>
 
-const onAreas = onNationalParks.focus('squareKilometers'); // Optic<number, mapped>
+const onAreas = onNationalParks.focus("squareKilometers"); // Optic<number, mapped>
 
 onAreas.getState(); // [19185.8, 562.5, 8983.2]
 ```
@@ -57,22 +57,22 @@ Here `onAreas` focuses on the squareKilometers property of each element focused 
 
 Mapped optics also have additional methods not found on total or partial optics. They resemble those from Javascript's `Array` type like `sort`, `filter` or `slice`.
 
--   `filter`
+- `filter`
 
 ```ts
 const onBigNationalParks = onNationalParks.filter(
-    (park) => park.squareKilometers > 10000
+  (park) => park.squareKilometers > 10000
 );
 // onBigNationalParks: Optic<{ name: string; squareKilometers: number }, mapped>
 
 onBigNationalParks.getState(); // [{ name: 'Denali', squareKilometers: 19185.8 }]
 ```
 
--   `sort`
+- `sort`
 
 ```ts
 const onNationalParksByArea = onNationalParks.sort(
-    (a, b) => a.squareKilometers - b.squareKilometers
+  (a, b) => a.squareKilometers - b.squareKilometers
 );
 // onNationalParksByArea: Optic<{ name: string; squareKilometers: number }, mapped>
 
@@ -86,17 +86,17 @@ const nationalParksByArea = onNationalParksByArea.getState();
 
 They also have methods to focus back on a single element, giving you a partial optic.
 
--   `findFirst`
+- `findFirst`
 
 ```ts
 const onFirstBelow10000 = onNationalParks.findFirst(
-    (park) => park.squareKilometers < 10000
+  (park) => park.squareKilometers < 10000
 ); // Optic<{ name: string; squareKilometers: number }, partial>
 
 onFirstBelow10000.getState(); // { name: 'Redwood', squareKilometers: 562.5 }
 ```
 
--   `min` and `max`
+- `min` and `max`
 
 ```ts
 const maxParkByArea = onNationalParks.max((park) => park.squareKilometers);

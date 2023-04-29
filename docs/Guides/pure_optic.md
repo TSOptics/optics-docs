@@ -1,5 +1,5 @@
 ---
-title: BaseOptic
+title: PureOptic
 ---
 
 A `BaseOptic` is an optic that is not linked to a store. You can't pass it to `useOptic()` and there's no `.getState()` or `.setState()` method.
