@@ -7,8 +7,8 @@ title: useKeyedOptics()
 
 ```ts
 function useKeyedOptics<T>(
-    onArray: Optic<T[]>,
-    keyExtractor: (t: T) => string
+  onArray: Optic<T[]>,
+  keyExtractor: (t: T) => string
 ): (key: string) => Optic<T>;
 ```
 
@@ -39,12 +39,12 @@ const User = memo(({ onUser }: { onUser: Optic<User> }) => ...)
 
 ### Motivation
 
-Technically to derive a new optic for every element of the array you can simply call `.focus(index)` for every index of the array:
+Technically to derive a new optic for every element of the array you can simply do the following:
 
 ```tsx
 const optics = useMemo(
-    () => users.map((_, index) => onUsers.focus(index)),
-    [users, onUsers]
+  () => users.map((_, index) => onUsers[index]),
+  [users, onUsers]
 );
 
 return users.map((user, index) => <User key={key} onUser={optics[index]} />);

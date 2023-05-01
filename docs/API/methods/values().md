@@ -16,10 +16,10 @@ Analogous to [Object.values](https://developer.mozilla.org/docs/Web/JavaScript/R
 ### Example:
 
 ```ts
-const onCapitals = createStore<Record<string, string>>({
-    France: 'paris',
-    Italy: 'roma',
-    Australia: 'canberra'
+const onCapitals = createState<Record<string, string>>({
+  France: "paris",
+  Italy: "roma",
+  Australia: "canberra",
 });
 
 const onValues = onCapitals.values();
@@ -30,5 +30,5 @@ const [values, setValue] = useOptic(onValues);
 
 setValue((prev) => prev[0].toUpperCase() + s.slice[1]);
 // values = ['Paris', 'Roma', 'Canberra'];
-// onCapitals.getState() = { France: 'Paris', Italy: 'Roma', Australia: 'Canberra' };
+// onCapitals.get() = { France: 'Paris', Italy: 'Roma', Australia: 'Canberra' };
 ```

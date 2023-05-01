@@ -19,19 +19,19 @@ The component will rerender each time the focused value changes.
 ### Example:
 
 ```tsx
-import { useOptic } from 'react-optics';
+import { useOptic } from "react-optics";
 
-const onCount = createStore(42);
+const onCount = createState(42);
 
 const MyCount = () => {
-    const [count, setCount] = useOptic(onCount);
+  const [count, setCount] = useOptic(onCount);
 
-    // set new count value
-    setCount(100);
+  // set new count value
+  setCount(100);
 
-    // pass an updater function to change count based on the previous value
-    setCount((prev) => prev + 1);
+  // pass an updater function to change count based on the previous value
+  setCount((prev) => prev + 1);
 
-    return <div>count: {count}</div>;
+  return <div>count: {count}</div>;
 };
 ```

@@ -17,13 +17,13 @@ If `start` isn't specified the slice will begin at index 0, if `end` isn't speci
 ### Example:
 
 ```ts
-const onAegeanIslands = createStore([
-    'Crete',
-    'Lesbos',
-    'Mykonos',
-    'Santorini',
-    'Rhodos',
-    'Kalokairi'
+const onAegeanIslands = createState([
+  "Crete",
+  "Lesbos",
+  "Mykonos",
+  "Santorini",
+  "Rhodos",
+  "Kalokairi",
 ]);
 // onAegeanIslands: Optic<string[]>
 

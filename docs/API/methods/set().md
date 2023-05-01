@@ -1,29 +1,35 @@
 ---
 title: .set()
+sidebar_position: 17
 ---
 
-# .set(Value, Root): NewRoot
+# .set(newValue)
 
 ```ts
-Optic<A, _, S>.set: (a: A | ((prev: A) => A), s: S) => S;
+Optic<A, _, S>.set: (a: A | ((prev: A) => A)) => void;
 ```
 
-This method takes a value `a` of the focused type, a value `s` of the root type and it returns a new value of the root type where the focused value is replaced by `a`.  
-To update the focused value based on its previous state you can pass an updater function (`(prev: A) => A`) instead of the next value itself.  
-Just like [`get`](<get()>), this method is mostly useful for BaseOptics.
+---
+
+This method allows you to update the value focused by the optic.  
+It is equivalent to the setter function returned by [`useOptic`](<../hooks/useOptic()>) but unlike `useOptic` you can use it outside of React components and hooks.
 
 ### Example:
 
 ```ts
-type User = {
-    name: string;
-    age: number;
-    verified: boolean;
-};
-const onName = optic<User>().focus('name');
+const onStates = createState([
+  { name: "virginia", capital: "Richmond", inhabitants: 8_535_519 },
+  { name: "Illinois", capital: "Chicago", inhabitants: 12_812_508 },
+]);
 
-const user: User = { name: 'Léon', age: 23, verified: false };
+onStates[1].capital.set("Springfield");
 
-const updatedUser = onName.set('Aristide', user);
-// updatedUser = { name: 'Aristide', age: 23, verified: false }
+onStates[0].name.set(
+  (prev) => prevName.charAt(0).toUpperCase() + prevName.slice(1)
+);
+
+// onStates.get() = [
+//     { name: 'Virginia', capital: 'Richmond', inhabitants: 8_535_519 },
+//     { name: 'Illinois', capital: 'Springfield', inhabitants: 12_812_508 }
+// ];
 ```

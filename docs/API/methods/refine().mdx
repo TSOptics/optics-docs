@@ -3,8 +3,8 @@ title: .refine()
 sidebar_position: 6
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # .refine(refiner): Optic
 
@@ -25,16 +25,16 @@ The `refiner` function must return the original value in its narrowed type or `f
 
 ```ts
 type Result<T> =
-    | { type: 'success'; value: T }
-    | { type: 'failure'; errorMessage: string };
+  | { type: "success"; value: T }
+  | { type: "failure"; errorMessage: string };
 
-const onResult = createStore<Result<number>>({ type: 'success', value: 42 });
+const onResult = createState<Result<number>>({ type: "success", value: 42 });
 
 const [, setResult] = useOptic(onResult);
 
 // highlight-start
 const onSuccess = onResult.refine(
-    (result) => result.type === 'success' && result
+  (result) => result.type === "success" && result
 );
 // onSuccess: Optic<{ type: 'success'; value: number }, partial>
 // highlight-end
@@ -42,17 +42,17 @@ const onSuccess = onResult.refine(
 const [success] = useOptic(onSuccess);
 // success === { type: 'success', value: 42 }
 
-setResult({ type: 'failure', errorMessage: 'Catastrophic meltdown' });
+setResult({ type: "failure", errorMessage: "Catastrophic meltdown" });
 // success === undefined
 ```
 
 ### - On a javascript built-in type
 
 ```ts
-const onUnknownValue = createStore<unknown>();
+const onUnknownValue = createState<unknown>();
 
 const onNumber = onUnknownValue.refine(
-    (unknownValue) => typeof unknownValue === 'number' && unknownValue
+  (unknownValue) => typeof unknownValue === "number" && unknownValue
 );
 // onNumber: Optic<number, partial>
 ```

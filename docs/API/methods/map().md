@@ -16,7 +16,7 @@ This method returns a new [mapped optic](<../../guides/mapped optics()>) from an
 ### Example:
 
 ```ts
-const onArray = createStore([1, 2, 3, 4, 5]);
+const onArray = createState([1, 2, 3, 4, 5]);
 
 const onNumbers = onArray.map();
 // onNumbers: Optic<number, mapped>

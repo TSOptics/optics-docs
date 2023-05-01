@@ -20,11 +20,11 @@ Its purpose is to map over a record, allowing you to change both keys and values
 ### Example:
 
 ```ts
-const onOlympicCities = createStore<Record<string, number>>({
-    paris: 2,
-    london: 3,
-    losAngeles: 2,
-    tokyo: 2
+const onOlympicCities = createState<Record<string, number>>({
+  paris: 2,
+  london: 3,
+  losAngeles: 2,
+  tokyo: 2,
 });
 
 const onEntries = onOlympicCities.entries();
@@ -34,8 +34,8 @@ const [entries, setEntries] = useOptic(onEntries);
 // entries = [["paris", 2], ["london", 3], ["losAngeles", 2], ["tokyo", 2]];
 
 setEntries(([city, olympiads]) => [
-    city.toUpperCase,
-    city === 'paris' || city === 'losAngeles' ? olympiads + 1 : olympiads
+  city.toUpperCase,
+  city === "paris" || city === "losAngeles" ? olympiads + 1 : olympiads,
 ]);
-// onOlympicCities.getState() = { PARIS: 3, LONDON: 3, LOSANGELES: 3, TOKYO: 2 };
+// onOlympicCities.get() = { PARIS: 3, LONDON: 3, LOSANGELES: 3, TOKYO: 2 };
 ```

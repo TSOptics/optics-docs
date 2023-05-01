@@ -16,7 +16,7 @@ This method takes a predicate and return a new partial optic focused either on t
 ### Example:
 
 ```ts
-const onNumber = createStore(42);
+const onNumber = createState(42);
 
 const onEvenNumber = onNumber.if((n) => n % 2 === 0);
 // onEvenNumber: Optic<number, partial>

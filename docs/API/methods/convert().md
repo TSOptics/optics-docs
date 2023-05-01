@@ -17,12 +17,12 @@ It returns an optic focused on this converted representation.
 ### Example:
 
 ```ts
-const onState = createStore({ milliseconds: 78450000 });
+const onState = createState({ milliseconds: 78450000 });
 
-const onMilliseconds = onState.focus('milliseconds');
+const onMilliseconds = onState.milliseconds;
 const onMinutes = onMilliseconds.convert(
-    (ms) => ms / 60000,
-    (minutes) => minutes * 60000
+  (ms) => ms / 60000,
+  (minutes) => minutes * 60000
 );
 ```
 
@@ -40,7 +40,7 @@ setMinutes((prev) => prev + 120);
 :::info
 The conversion should be lossless, it means that this laws must be respected:
 
--   `from(to(a)) = a`
--   `to(from(b)) = b`
+- `from(to(a)) = a`
+- `to(from(b)) = b`
 
 :::

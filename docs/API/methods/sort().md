@@ -16,15 +16,15 @@ The comparison function works the same way as in [Array.sort](https://developer.
 
 ### Examples:
 
--   Default comparison function
+- Default comparison function
 
 ```ts
-const onLänder = createStore([
-    'Hamburg',
-    'Bayern',
-    'Sachsen',
-    'Brandenburg',
-    'Saarland'
+const onLänder = createState([
+  "Hamburg",
+  "Bayern",
+  "Sachsen",
+  "Brandenburg",
+  "Saarland",
 ]);
 
 const onSortedLänder = onLänder.map().sort();
@@ -34,10 +34,10 @@ const [sortedLänder] = useOptic(onSortedLänder);
 // sortedLänder = ['Bayern', 'Brandenburg', 'Hamburg', 'Saarland', 'Sachsen']
 ```
 
--   Custom comparison function
+- Custom comparison function
 
 ```ts
-const onNumbers = createStore([90, 76, 456, 2, 39, -15, 1, -65]);
+const onNumbers = createState([90, 76, 456, 2, 39, -15, 1, -65]);
 // onNumbers: Optic<number[]>
 
 const onSortedNumbers = onNumbers.map().sort((a, b) => a - b);

@@ -19,8 +19,8 @@ This method focuses on an object's property and yield the provided default value
 ### Example:
 
 ```ts
-const onStore = createStore<{ a?: number }>({ a: undefined });
-const onA = onStore.focusWithDefault('a', () => 42);
+const onStore = createState<{ a?: number }>({ a: undefined });
+const onA = onStore.focusWithDefault("a", () => 42);
 
 const [a, setA] = useOptic(onA);
 // a === 42

@@ -14,7 +14,7 @@ Optic<A, mapped>.findFirst: (predicate: (a: A) => boolean) => Optic<A, partial>;
 Analogous to [Array.find](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/find), this method returns an optic focused on the first element of the mapped optic that satisfies the predicate. The returned optic is partial and yields `undefined` if no value satisfies the predicate.
 
 ```ts
-const onNumbers = createStore([42, 16, 98, 123, 8, 245]).map();
+const onNumbers = createState([42, 16, 98, 123, 8, 245]).map();
 // onNs: Optic<number, mapped>
 
 const onGreaterThan100 = onNumbers.findFirst((n) => n > 100);

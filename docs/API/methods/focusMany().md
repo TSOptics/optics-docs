@@ -10,12 +10,12 @@ sidebar_position: 3
 This method allows you to derive optics for multiple properties of an object in a single expression.
 
 ```ts
-const onState = createStore({ name: 'Leo', age: 32, married: false });
+const onState = createState({ name: "Leo", age: 32, married: false });
 
 const { onName, onAge, onMarried } = onState.focusMany([
-    'name',
-    'age',
-    'married'
+  "name",
+  "age",
+  "married",
 ]);
 // onName: Optic<string>
 // onAge: Optic<number>
@@ -26,7 +26,7 @@ By default the name of each derived optics is prefixed by `on` but you can chang
 
 ```ts
 const { focusedOnName, focusedOnAge, focusedOnMarried } = onState.focusMany(
-    ['name', 'age', 'married'],
-    'focusedOn'
+  ["name", "age", "married"],
+  "focusedOn"
 );
 ```
