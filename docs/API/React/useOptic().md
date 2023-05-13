@@ -19,7 +19,7 @@ The component will rerender each time the focused value changes.
 ### Example:
 
 ```tsx
-import { useOptic } from "react-optics";
+import { useOptic } from "@optics/react";
 
 const onCount = createState(42);
 

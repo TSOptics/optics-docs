@@ -3,8 +3,8 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
-  title: "React-Optics",
-  tagline: "Composable state management for react",
+  title: "Optics",
+  tagline: "Composable state management for TypeScript applications",
   url: "https://tsoptics.github.io",
   baseUrl: "/",
   onBrokenLinks: "warn",
@@ -15,7 +15,7 @@ module.exports = {
   trailingSlash: false,
   themeConfig: {
     navbar: {
-      title: "React-Optics",
+      title: "Optics",
       logo: {
         src: "img/react-optics.svg",
         srcDark: "img/react-optics-dark.svg",
@@ -30,8 +30,9 @@ module.exports = {
         { to: "/blog", label: "Blog", position: "left" },
         {
           href: "https://github.com/TSOptics/react-optics",
-          label: "GitHub",
           position: "right",
+          className: "header-github-link",
+          "aria-label": "GitHub repository",
         },
       ],
     },

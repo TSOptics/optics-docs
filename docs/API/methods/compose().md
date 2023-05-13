@@ -3,15 +3,15 @@ title: .compose()
 sidebar_position: 5
 ---
 
-# .compose(baseOptic): Optic
+# .compose(pureOptic): Optic
 
 ```ts
-Optic<B, _, A>.compose: <C>(baseOptic: BaseOptic<C, _, B>) => Optic<C, _, A>;
+Optic<B>.compose: <C>(pureOptic: PureOptic<C, _, B>) => Optic<C>;
 ```
 
 ---
 
-On an optic on B from A, the compose method takes a pure optic on C from B and returns a new optic on C from A.
+On an optic on B, the compose method takes a pure optic on C from B and returns a new optic on C.
 
 ### Example:
 

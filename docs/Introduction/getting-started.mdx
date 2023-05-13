@@ -3,9 +3,6 @@ sidebar_position: 2
 ---
 
 import MdxImage from "../../src/components/Image";
-import Counter from "../../src/components/getting-started/Counter";
-import Counters from "../../src/components/getting-started/Counters";
-import CountersWithStep from "../../src/components/getting-started/CountersWithStep";
 import CodeBlock from "@theme/CodeBlock";
 import Admonition from "@theme/Admonition";
 
@@ -95,7 +92,7 @@ onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jane", 
 
 Where it gets interesting is that, from this base optic, you can get new ones focused on different parts of your state !
 
-For exemple let's get an optic that focuses on the city of the first user is our list:
+For exemple let's get an optic that focuses on the city of the first user in our list:
 
 ```ts
 const onCity = onUsers[0].address.city;
@@ -104,7 +101,7 @@ const onCity = onUsers[0].address.city;
 
 :::tip
 Deriving a new optic looks just like accessing properties of an object !  
-You get the same **type-safety and code completion** in your editor as with plain objects.
+You get the same **type-safety and code completion** in your editor as with plain javascript objects.
 :::tip
 
 Now we can directly read and update the city of the first user thanks to our new optic:
