@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkoptics_docs=self.webpackChunkoptics_docs||[]).push([[5631],{8820:s=>{s.exports=JSON.parse('{"label":"facebook","permalink":"/optics-docs/blog/tags/facebook","allTagsPath":"/optics-docs/blog/tags","count":1}')}}]);
