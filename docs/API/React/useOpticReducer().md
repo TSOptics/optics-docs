@@ -23,7 +23,7 @@ The only difference is that you can use a reducer that takes a pure optic as thi
 ### Example:
 
 ```tsx
-import { createState, useReducer } from "react-optics";
+import { createState, useReducer } from "@optics/react";
 
 const initialCounter = { value: 0, step: 1 };
 const onCounter = createState(initialCounter);

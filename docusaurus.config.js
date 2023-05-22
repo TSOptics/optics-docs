@@ -6,12 +6,12 @@ module.exports = {
   title: "Optics",
   tagline: "Composable state management for TypeScript applications",
   url: "https://tsoptics.github.io",
-  baseUrl: "/",
+  baseUrl: "/optics-docs/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon/favicon.ico",
   organizationName: "TSOptics", // Usually your GitHub org/user name.
-  projectName: "react-optics-docs", // Usually your repo name.
+  projectName: "optics-docs", // Usually your repo name.
   trailingSlash: false,
   themeConfig: {
     navbar: {
@@ -29,7 +29,7 @@ module.exports = {
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://github.com/TSOptics/react-optics",
+          href: "https://github.com/TSOptics/optics",
           position: "right",
           className: "header-github-link",
           "aria-label": "GitHub repository",
@@ -74,7 +74,7 @@ module.exports = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/TSOptics/react-optics",
+              href: "https://github.com/TSOptics/optics",
             },
           ],
         },
@@ -93,7 +93,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: "https://github.com/TSOptics/react-optics-docs/edit/master",
+          editUrl: "https://github.com/TSOptics/optics-docs/edit/master",
           remarkPlugins: [
             [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
           ],
@@ -101,7 +101,7 @@ module.exports = {
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
-          editUrl: "https://github.com/TSOptics/react-optics-docs/edit/master/",
+          editUrl: "https://github.com/TSOptics/optics-docs/edit/master/",
         },
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
