@@ -1,0 +1,216 @@
+---
+title: Map/Reduce
+sidebar_position: 2
+---
+
+# Map/Reduce
+
+## Map
+
+While a total optic is focused on **one** value and a partial optic is focused on **zero or one** value, a **mapped** optic is focused on **multiple values**.  
+Such optic can read these values and update them simultaneously.
+
+To illustrate that let's create a new state holding US national parks:
+
+```ts
+const onState = createState([
+  {
+    name: "Zion",
+    visitors: 5_039_835,
+    attractions: ["angels landing", "great white throne"],
+  },
+  {
+    name: "Yosemite",
+    visitors: 3_287_595,
+    attractions: ["half dome", "el capitan", "mariposa grove"],
+  },
+  {
+    name: "Yellowstone",
+    visitors: 4_860_242,
+    attractions: ["old faithful", "grand prismatic"],
+  },
+]);
+// onState: Optic<{ name: string; visitors: number; attractions: string[] }[]>
+```
+
+The initial state is an array so we can call `.map()` to get a mapped optic, an optic that **maps over** the values of the array:
+
+```ts
+const onNationalParks = onState.map();
+// onNationalParks: Optic<{ name: string; visitors: number; attractions: string[] }, mapped>
+```
+
+From there we can get the name of every national park ...
+
+```ts
+const onNames = onNationalParks.name;
+// onNames: Optic<string, mapped>
+
+onNames.get(); // ['Zion', 'Yosemite', 'Yellowstone']
+```
+
+... or update them all at once:
+
+```ts
+onNames.set((prev) => `${prev} National Park`);
+
+onNames.get(); // ['Zion National Park', 'Yosemite National Park', 'Yellowstone National Park']
+```
+
+Same thing but for the annual number of visitors:
+
+```ts
+const onVisitors = onNationalParks.visitors;
+// onVisitors: Optic<number, mapped>
+
+onVisitors.get(); // [5_039_835, 3_287_595, 4_860_242]
+
+onVisitors.set((prev) => prev + 1_000_000);
+onVisitors.get(); // [6_039_835, 4_287_595, 5_860_242]
+```
+
+The update function is applied to every focused value, which is convenient to update or reset a large number of values all at once.
+
+:::tip
+The new optics you derive from a mapped optic are themselves mapped optics !
+:::
+
+#### Multi level
+
+You can call `.map()` every time the focused value is an array, even if the optic is **already a mapped one**:
+
+```ts
+const onAttractions = onNationalParks.attractions.map();
+// onAttractions: Optic<string, mapped>
+```
+
+Here `onAttractions` is a mapped optic focused on every attraction from every national park.
+
+```ts
+onAttractions.get(); // ['angels landing', 'great white throne', 'half dome', 'el capitan', 'mariposa grove', 'old faithful', 'grand prismatic']
+
+onAttractions.set(capitalize);
+onAttractions.get(); // ['Angels Landing', 'Great White Throne', 'Half Dome', 'El Capitan', 'Mariposa Grove', 'Old Faithful', 'Grand Prismatic']
+```
+
+Calling `.get()` returns a flat representation of all attractions, even though in the state they are nested in their respective national parks.
+
+Updating them with `.set()` preserves the state's original structure.  
+We can see that if we look at our state, now that we've applied all these transformations thanks to mapped optics:
+
+```ts
+// onNationalParks.get();
+[
+  {
+    name: "Zion National Park",
+    visitors: 6_039_835,
+    attractions: ["Angels Landing", "Great White Throne"],
+  },
+  {
+    name: "Yosemite National Park",
+    visitors: 4_287_595,
+    attractions: ["Half Dome", "El Capitan", "Mariposa Grove"],
+  },
+  {
+    name: "Yellowstone National Park",
+    visitors: 5_860_242,
+    attractions: ["Old Faithful", "Grand Prismatic"],
+  },
+];
+```
+
+:::tip cardinality recap
+
+- **total: 1..1**
+- **partial: 0..1**
+- **mapped: 0..n**
+
+:::
+
+## Reduce
+
+Mapped optics have special methods called **reduce** methods.  
+They yield new optics, either mapped or partial, that **reduce** the mapped values to focus on some of them or back to a single one.
+
+For example to focus on all attractions sorted by name...:
+
+```ts
+const onSortedAttractions = onAttractions.reduceSort((a, b) =>
+  a.localeCompare(b)
+);
+// onSortedAttractions: Optic<string, mapped>
+
+onSortedAttractions.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic', 'Great White Throne', 'Half Dome', 'Mariposa Grove', 'Old Faithful']
+```
+
+... and then to focus on the first three:
+
+```ts
+const onFirstThree = onSortedAttractions.reduceSlice(0, 3);
+// onFirstThree: Optic<string, mapped>
+
+onFirstThree.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic']
+onFirstThree.set((prev) => prev.toUpperCase());
+
+onAttractions.get(); // ['ANGELS LANDING', 'Great White Throne', 'Half Dome', 'EL CAPITAN', 'Old Faithful', 'Mariposa Grove', 'GRAND PRISMATIC']
+```
+
+### Back to one (or none)
+
+The above examples return new mapped optics but some reduce methods can also give us a partial optic by **reducing back to a single value**.
+
+For example to focus on the first attraction starting with the letter G:
+
+```ts
+const onFirstStartingWithG = onAttractions.reduceFindFirst((attraction) =>
+  attraction.startsWith("G")
+);
+// onFirstStartingWithG: Optic<string, partial>
+
+onFirstStartingWithG.get(); // 'Great White Throne'
+```
+
+Or to focus on the attraction with the shortest name:
+
+```ts
+const onShortestName = onAttractions.reduceMin((name) => name.length);
+// onShortestName: Optic<string, partial>
+
+onShortestName.get(); // 'Half Dome'
+```
+
+:::info
+We get a **partial optic** instead of a total one because the mapped optic might yield no value at all, in case the arrays we mapped over are empty.
+:::
+
+<details>
+  <summary>Reduce methods vs Array methods</summary>
+
+You might have noticed that the reduce methods look a lot like the methods
+available to optics focused on arrays (e.g.
+`reduceFindFirst` vs `findFirst`).  
+The difference is that array methods operate on the array that's currently focused by the optic,
+while reduce methods operate on the whole mapping.
+
+It means that ...
+
+```ts
+onNationalParks.attractions.max((attraction) => attraction.length);
+// Optic<string, mapped>
+
+// ['Great White Throne', 'Mariposa Grove', 'Grand Prismatic']
+```
+
+... is different from:
+
+```ts
+onNationalParks.attractions.reduceMax((attractions) => attractions.length);
+// Optic<string[], partial>
+
+// ['Half Dome', 'El Capitan', 'Mariposa Grove']
+```
+
+With the first example we focus on the attraction with the longest name for each national park,
+while with the second example we focus on the attractions of the national park that has the most attractions (Yosemite).
+
+</details>
