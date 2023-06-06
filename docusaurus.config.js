@@ -108,5 +108,11 @@ module.exports = {
         },
       },
     ],
+    [
+      "docusaurus-preset-shiki-twoslash",
+      {
+        themes: ["solarized-dark"],
+      },
+    ],
   ],
 };

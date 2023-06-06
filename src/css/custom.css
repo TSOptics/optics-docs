@@ -24,12 +24,6 @@
   padding: 0 var(--ifm-pre-padding);
 }
 
-/* If you have a different syntax highlighting theme for dark mode. */
-[data-theme='dark'] {
-  /* Color which works with dark mode syntax highlighting theme */
-  --docusaurus-highlighted-code-line-bg: rgb(80, 80, 80);
-}
-
 .header-github-link:hover {
   opacity: 0.6;
 }

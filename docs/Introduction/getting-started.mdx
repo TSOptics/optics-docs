@@ -10,20 +10,24 @@ import Admonition from "@theme/Admonition";
 
 **Optics** is a library to manage global immutable state in TypeScript applications.
 
-It let's you declare **references** to parts of your state, called **optics**, that allow you to **read** and **update** these parts as well as **subscribe** to their changes.
-
-**@Optics** is lightweight, unopinionated and typesafe.  
-The core is framework agnostic and we will eventually ship adapters to other frameworks.
-
-## Requirements
-
-`@optics/react` requires **React 18** or higher and **TypeScript 4.1** or higher.
+It let's you declare **references** to parts of your state, called **optics**, that allow you to **read** and **update** these parts as well as **subscribe** to their changes.  
+Optics are compositional in nature, making them a natural fit for component based UI frameworks.
 
 ## Installation
+
+- Install the React version (requires React 18+):
 
 ```bash npm2yarn
 npm install @optics/react
 ```
+
+- **Or** install the framework agnostic core:
+
+```bash
+npm install @optics/state
+```
+
+This library has been built around TypeScript's powerful inference capabilities, using it in strict mode is strongly recommended.
 
 ## Basic example
 
@@ -32,20 +36,8 @@ npm install @optics/react
 In our application let's start by creating a state holding a list of users.
 For that let's call `createState` and pass it an initial value.
 
-```ts
+```twoslash include main
 import { createState } from "@optics/react";
-
-type User = {
-  name: string;
-  age: number;
-  address: {
-    city: string;
-    street: {
-      name: string;
-      number: number;
-    };
-  };
-};
 
 const onUsers = createState([
   {
@@ -54,11 +46,14 @@ const onUsers = createState([
     address: { city: "New York", street: { name: "5th Avenue", number: 940 } },
   },
 ]);
-// onUsers: Optic<User[]>
+```
+
+```ts twoslash
+// @include: main
 ```
 
 `createState` returns an **optic**.  
-An optic is a **reference** to a piece of application state and it allows us to read and update this piece.
+An optic is a **reference** to a piece of application state and it allows us to read, update this piece as well as subscribe to it.
 
 :::tip
 You're not restricted to a single global state, you can call `createState` as many times as want.
@@ -68,13 +63,17 @@ You're not restricted to a single global state, you can call `createState` as ma
 
 - Calling `get` on the optic let's us read the state:
 
-```ts
+```ts twoslash
+// @include: main
+// ---cut---
 onUsers.get(); // [{ name: "John", age: 42, address: { ... } }]
 ```
 
 - Calling `set` on the optic let's us update the state:
 
-```ts
+```ts twoslash
+// @include: main
+// ---cut---
 // adds a new user
 onUsers.set((prev) => [
   ...prev,
@@ -94,9 +93,12 @@ Where it gets interesting is that, from this base optic, you can get new ones fo
 
 For exemple let's get an optic that focuses on the city of the first user in our list:
 
-```ts
+```ts twoslash
+// @include: main
+// ---cut---
+
 const onCity = onUsers[0].address.city;
-// onCity: Optic<string>
+//    ^?
 ```
 
 :::tip
@@ -104,9 +106,12 @@ Deriving a new optic looks just like accessing properties of an object !
 You get the same **type-safety and code completion** in your editor as with plain javascript objects.
 :::tip
 
-Now we can directly read and update the city of the first user thanks to our new optic:
+Now we can directly read and update the city of the first user with this optic:
 
-```ts
+```ts twoslash
+// @include: main
+const onCity = onUsers[0].address.city;
+// ---cut---
 onCity.get(); // "New York"
 
 onCity.set("Boston");
@@ -118,49 +123,58 @@ onCity.get(); // "Boston"
   <summary>
     Let's compare that with the manual way of updating immutable data:
   </summary>
-  <CodeBlock language="ts">
-    {`
+
+```ts
 // 😵‍💫
-onUsers.set((prev) => [
+const newState = [
   {
-    ...prev[0],
+    ...users[0],
     address: {
-      ...prev[0].address,
+      ...users[0].address,
       city: "Boston",
     },
   },
-  ...prev.slice(1),
-]);
-`}
+  ...users.slice(1),
+];
+```
 
-  </CodeBlock>
-<Admonition type="tip">
+:::tip
 Using optics saves us from quite the boilerplate when updating deeply nested data !
-</Admonition>
+:::
+
 </details>
 
-Optics allows you to focus on **narrower parts of your state**, allowing you to read and update these parts independently of the rest.
+Optics let you focus on **narrower parts of your state**, allowing you to read and update these parts independently of the rest.
 
 More examples:
 
-```ts
-onUsers[0].address.city.get(); // "New York"
+```ts twoslash
+// @include: main
+// ---cut---
+onUsers[0].address.city.get(); // "Boston"
 
 const onJaneStreet = onUsers[1].address.street;
-// onJaneStreet: Optic<{ name: string; number: number; }>
-
+//    ^?
 onJaneStreet.number.set(42);
 
 onJaneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
 ```
 
+:::info
+For now don't worry about the `total` type parameter, you'll be able to learn about that later in the [total and partial](../Guides/total_partial) section of the docs.
+:::
+
 ### Usage in components
 
-Your React components can subscribe to an optic and re-render when the focused state changes.
+Your React components can subscribe to optics and re-render when the focused states change.
 
-Pass an optic to the `useOptic` hook, just like React's `useState` it will return a tuple with the current value and a setter.
+Call the `useOptic` hook with an optic, similarily to `useState` it returns a tuple with the current value and a setter.
 
-```tsx title=StreetForm.tsx
+```tsx twoslash
+// @include: main
+
+const onJaneStreet = onUsers[1].address.street;
+// ---cut---
 import { useOptic } from "@optics/react";
 
 const StreetForm = () => {
@@ -175,7 +189,7 @@ const StreetForm = () => {
           value={street.number}
           type="number"
           onChange={(e) =>
-            setStreet((prev) => ({ ...prev, number: e.target.value }))
+            setStreet((prev) => ({ ...prev, number: parseInt(e.target.value) }))
           }
         />
       </label>
@@ -197,41 +211,50 @@ const StreetForm = () => {
   <summary>
     Alternative <code>onChange</code>:
   </summary>
-  <CodeBlock language="tsx">
-    {`
-onChange={(e) =>
-  onJaneStreet.name.set(e.target.value);
-}
-  `}
-  </CodeBlock>
-  <Admonition type="tip">
-    If you're updating only a subset of the focused data, then instead of using
-    the setter let's focus on that subset and call <code>set</code> on it !
-  </Admonition>
+
+`useOptic` returns a setter for convenience and familiarity.  
+But you can use optics directly instead, especially if you're only updating a subset of the focused state:
+
+```tsx twoslash
+// @include: main
+const onJaneStreet = onUsers[1].address.street;
+// ---cut---
+<input onChange={(e) => onJaneStreet.name.set(e.target.value)} />;
+```
+
 </details>
 
 <br />
 
-The component will re-render when the street changes, whether it is changed from within the component or from another part of the application.
+The component will re-render when the street changes, whether it is changed from within the component or from elsewhere in the application.
 
-```ts
-// outside the component
+```ts twoslash
+// @include: main
+const onJaneStreet = onUsers[1].address.street;
+// ---cut---
+
+// outside of the component
 onJaneStreet.number.set((prev) => prev + 1);
-// StreetFrom will re-render
+
+// StreetFrom re-renders 🔄
 ```
 
 However the component will not re-render if an unrelated part of the state changes.
 
-```ts
+```ts twoslash
+// @include: main
+const onJane = onUsers[1];
+// ---cut---
+
 onJane.age.set((prev) => prev + 1);
-// jane's street reference hasn't changed, StreetForm won't re-render
+// jane's street reference hasn't changed, StreetForm doesn't re-render
 ```
 
 ### Pass optics in props
 
 Instead of referencing the optic directly, the component could accept one **via its props**.
 
-```tsx title=StreetForm.tsx
+```tsx twoslash
 import { useOptic, Optic } from "@optics/react";
 
 interface Props {
@@ -244,14 +267,28 @@ const StreetForm = ({ onStreet }: Props) => {
 };
 ```
 
-Now `StreetForm` isn't **coupled** to a specific part of the state anymore, it can take **any optic** focused on a street.
+Now `StreetForm` isn't **coupled** to a specific part of the state anymore, it can take **any optic** that's focused on a street.
 
-```tsx
-// Form for john's streeet
-<StreetForm onStreet={onUsers[0].address.street}/>
+```tsx twoslash
+// @include: main
+import { Optic } from "@optics/react";
 
-// Form for jane's street
-<StreetForm onStreet={onUsers[1].address.street}/>
+interface Props {
+  onStreet: Optic<{ name: string; number: number }>;
+}
+
+const StreetForm = ({ onStreet }: Props) => {
+  return (<></>) as React.JSX.Element;
+};
+
+// ---cut---
+<>
+  {/* Form for john's street */}
+  <StreetForm onStreet={onUsers[0].address.street} />
+
+  {/* Form for jane's street */}
+  <StreetForm onStreet={onUsers[1].address.street} />
+</>;
 ```
 
 ## Next steps
