@@ -20,21 +20,40 @@ This parallel is useful to grasp the core concepts of optics because just like r
 
 We already saw that we can decompose, or break down, an optic into smaller parts by calling properties of the object they point to.
 
-```ts
-const onJeanneAge = onUsers[1].age;
-// onJeanneAge: Optic<number>
+```twoslash include main
+import { createState } from "@optics/react";
+
+const onUsers = createState([
+  {
+    name: "John",
+    age: 42,
+    address: { city: "New York", street: { name: "5th Avenue", number: 940 } },
+  },
+]);
 ```
 
-When we access the index `1` of the root optic and then the `age` property, getting us a new optic focused on a narrower part of the initial state.  
-It's what we call **top-down** decomposition, we start at the top from a root optic at and we break it down into its sub-parts as we go down the tree.
+```ts twoslash
+// @include: main
+// ---cut---
+
+const onJeanneAge = onUsers[1].age;
+//    ^?
+```
+
+We access the index `1` of the root optic and then the `age` property, getting us a new optic focused on a narrower part of the initial state.  
+It's what we call **top-down decomposition**, we start at the top from a root optic at and we break it down into its sub-parts as we go down the tree.
 
 Now we can read and update this number **independently of the surrounding state**.
-In fact we don't have to care if there's a surrounding state at all or if it's an optic direclty returned by `createState`, only what's currently focused matters.
+In fact we don't have to care if there's a surrounding state at all or if it's an optic direclty returned by `createState`. Only what's currently focused matters.
 
 :::info
 When deriving an optic in a component body it's better to wrap with in `useMemo` to avoid recreating a new reference at every render.
 
-```ts
+```ts twoslash
+// @include: main
+import { useMemo } from "react";
+// ---cut---
+
 const onJeanneAge = useMemo(() => onUsers[1].age, [onUsers]);
 ```
 
@@ -46,7 +65,11 @@ we just have to **focus on the specific part** we want to update and call `set` 
 
 Once we update the underlying value, the subscribers (usually components) will be notified, whether they subscribed to the `onJeanneAge` optic or any other optic whose value would have changed due to the update.
 
-```ts
+```ts twoslash
+// @include: main
+const onJeanneAge = onUsers[1].age;
+// ---cut---
+
 onUsers.subscribe(() => console.log("users informations were updated")); // ✅
 onUsers[0].subscribe(() => console.log("John's informations were updated")); // ❌
 onUsers[1].subscribe(() => console.log("Jeanne's informations were updated")); // ✅
@@ -68,7 +91,8 @@ Console output:
 John's subscriber was not notified because the former doesn't know about Jeanne or her age.
 
 :::caution
-Don't use destructuring to derive new optics, since we use Proxies under the hood to return new optics from properties the following won't work:
+Don't use destructuring to derive new optics.  
+They use proxies under the hood to return new optics from properties so the following won't work:
 
 ```ts
 const { age, name } = onJeanne;
@@ -83,9 +107,12 @@ It's a way to derive new optics not from a property but from a condition, a tran
 
 For example if we want to focus on the oldest user:
 
-```ts
+```ts twoslash
+// @include: main
+const onJeanneAge = onUsers[1].age;
+// ---cut---
+
 const onOldestUser = onUsers.max((user) => user.age);
-// onOldestUser: Optic<User>
 
 onOldestUser.get(); // { name: "John", age: 42, address: { ... } }
 
@@ -101,21 +128,33 @@ While `max` is only available when the focused type is an array, some methods ar
 One such method is [`convert`](<../API/Methods/convert()>). It let's you perform a lossless conversion from the focused type to another.  
 For example if we wanted to manipulate the user's street as a tuple instead of an object:
 
-```ts
-const onJeanStreetTuple = onJeanne.address.street.convert(
+```ts twoslash
+// @include: main
+const onJeanne = onUsers[1];
+// ---cut---
+
+const onJeanneStreetTuple = onJeanne.address.street.convert(
   ({ name, number }) => [name, number] as const,
   ([name, number]) => ({ name, number })
 );
-// onJeanStreetTuple: Optic<[string, number]>
 ```
 
 Here we passed two functions to `convert`: one to transform the street object into a tuple, and a second one that does the reverse transformation (from tuple to object).  
 Now we can manipulate the street as a tuple even though it is still represented as an object in the state.
 
-```ts
-onJeanStreetTuple.set(([name, number]) => [name, number + 10]);
+```ts twoslash
+// @include: main
+const onJeanne = onUsers[1];
+const onJeanneStreetTuple = onJeanne.address.street.convert(
+  ({ name, number }) => [name, number] as const,
+  ([name, number]) => ({ name, number })
+);
 
-onJaneStreetTuple.get(); // ["Rue de Rivoli", 11]
+// ---cut---
+
+onJeanneStreetTuple.set(([name, number]) => [name, number + 10]);
+
+onJeanneStreetTuple.get(); // ["Rue de Rivoli", 11]
 
 onJeanne.address.street.get(); // { name: "Rue de Rivoli", number: 11 }
 ```
@@ -127,42 +166,73 @@ You can check all the methods available to optics like [`min`](<../API/Methods/m
 We just saw that we can decompose optics (top-down) but we actually can also do the opposite,
 meaning we can create new optics by composing already existing optics together (**bottom-up composition**).
 
-To illustrate let's create a new state, a club with a name and a list of members:
+To illustrate let's create a new organization with a name, and a list of employees:
 
-```ts
-const onClub42 = createState({
-  name: "Club 42",
-  established: "1974",
-  members: [onJeanne, onJohn],
+```twoslash include Interpol
+import { createState, Optic } from "@optics/react";
+
+let onUsers: Optic<
+  {
+    name: string;
+    age: number;
+    address: { city: string; street: { name: string; number: number } };
+  }[]
+> = {} as any;
+const onJohn = onUsers[0];
+const onJeanne = onUsers[1];
+
+const onInterpol = createState({
+  name: "Interpol",
+  established: "1923",
+  employees: [onJeanne, onJohn],
 });
 ```
 
-As you can see the members we passed are not actual javascript objects but optics we created earlier.
+```ts twoslash
+// @include: main
+const onJohn = onUsers[0];
+const onJeanne = onUsers[1];
 
-When we call `get` on the club's optic it automatically **denormalizes** the result and replaces the optics by their respective state:
+// ---cut---
 
-```ts
-// onClub42.get() output
-{
-  name: "Club 42",
-  established: "1974",
-  members: [
-    { name: "Jeanne", age: 80, address: { ... } },
-    { name: "John", age: 42, address: { ... } },
-  ],
-}
+const onInterpol = createState({
+  name: "Interpol",
+  established: "1923",
+  employees: [onJeanne, onJohn],
+});
+```
+
+As you can see the employees we passed are not actual javascript objects but optics we created earlier.
+
+When we call `get` on interpol's optic it automatically **denormalizes** the result and replaces the optics by their respective state:
+
+```ts twoslash
+// @include: Interpol
+// ---cut---
+const interpol = onInterpol.get();
+// {
+//   name: "Interpol",
+//   established: "1923",
+//   employees: [
+//     { name: "Jeanne", age: 80, address: { ... } },
+//     { name: "John", age: 42, address: { ... } },
+//   ],
+// }
 ```
 
 We have created a new state which is the composition of its own state and references to those of our two previous users.
 
-If we update the state of one of the members then it's like if the club state was updated as well
+If we update the state of one of the employees then it's like if the organization state was updated as well
 so its subscribers will be notified (will re-render if they are components).
 
 To illustrate let's give back Jeanne her youth:
 
-```ts
-onClub42.members.subscribe((members) =>
-  console.log(`one of the ${members.length} members was updated`)
+```ts twoslash
+// @include: Interpol
+const onJeanneAge = onJeanne.age;
+// ---cut---
+onInterpol.employees.subscribe((employees) =>
+  console.log(`one of the ${employees.length} employees was updated`)
 );
 
 onJeanneAge.set(32);
@@ -171,7 +241,7 @@ onJeanneAge.set(32);
 Console output:
 
 ```
-one of the 2 members was updated
+one of the 2 employees was updated
 ```
 
 Using optics in the state of an entity is a way to create **relations** between your different states.  
@@ -183,44 +253,48 @@ In SQL we use **joins** to get the final denormalized result, with optics it is 
   You can choose to get the normalized result instead, by setting the denormalize
   option to <code>false</code> when calling <code>get</code>:<br />
 
-```ts
-onClub42.get({ denormalize: false });
+```ts twoslash
+// @include: Interpol
+// ---cut---
+const result = onInterpol.get({ denormalize: false });
 ```
 
-The returned type will of course change depending on whether denormalize is set to
-true or false:
+The type of the returned value will of course change depending on the value of `denormalize`:
 
 <table>
 <thead>
 <tr>
-<th width="500px">
-denormalize: true (default)
-</th>
-<th width="500px">
+<th width="700px">
 denormalize: false
+</th>
+<th width="700px">
+denormalize: true (default)
 </th>
 </tr>
 </thead>
   <tr>
     <td>
 
-```json {4}
-{
-  name: string;
-  established: string;
-  members: User[];
-}
+```ts twoslash
+// @include: Interpol
+const result = onInterpol.get({ denormalize: false });
+// ---cut---
+
+result;
+//    ^?
 ```
 
 </td>
 <td>
 
-```json {4}
-{
-  name: string;
-  established: string;
-  members: Optic<User>[];
-}
+```ts twoslash
+// @include: Interpol
+const denormalizedResult = onInterpol.get();
+
+// ---cut---
+
+denormalizedResult;
+//    ^?
 ```
 
 </td>
@@ -230,18 +304,27 @@ denormalize: false
 
 #### State graph
 
-The club has a reference to its members but in turn indivual members can also have references to other entities.  
+The organization has a reference to its employees but in turn indivual employee can also have references to other entities.  
 First let's make cities a first-class citizen in our state:
 
-```ts
+```twoslash include cities
+import { createState } from "@optics/react";
+
 const onParis = createState({ name: "Paris", inhabitants: 2_200_000 });
 const onMilan = createState({ name: "Milan", inhabitants: 1_400_000 });
 const onNewYork = createState({ name: "New York", inhabitants: 8_500_000 });
 ```
 
+```ts twoslash
+// @include: cities
+```
+
 Then we can rework our initial state. Instead of representing a user's city with a string let's use an optic to reference a previously created city:
 
-```ts
+```ts twoslash
+// @include: cities
+// ---cut---
+
 const onUsers = createState([
   {
     name: "John",
@@ -256,36 +339,52 @@ const onUsers = createState([
 ]);
 ```
 
-Now the fully denormalized result from `onClub42` looks like that:
+Now the fully denormalized result from `onInterpol` looks like that:
 
-```ts
-// onClub42.get()
-{
-  name: "Club 42",
-  established: "1974",
-  members: [
-    {
-      name: "John",
-      age: 42,
-      address: {
-        city: {
-          name: "New York",
-          inhabitants: 8_500_000,
-        },
-      },
-    },
-    {
-      name: "Jeanne",
-      age: 32,
-      address: {
-        city: {
-          name: "Milan",
-          inhabitants: 1_400_000,
-        },
-      },
-    },
-  ],
-}
+```ts twoslash
+// @include: cities
+import { Optic } from "@optics/react";
+const onJohn = createState({
+  name: "John",
+  age: 42,
+  address: { city: onNewYork },
+});
+const onInterpol = createState({
+  name: "Interpol",
+  established: "1923",
+  employees: [onJohn],
+});
+
+// ---cut---
+
+const interpol = onInterpol.get();
+
+// {
+//   name: "Interpol",
+//   established: "1923",
+//   employees: [
+//     {
+//       name: "John",
+//       age: 42,
+//       address: {
+//         city: {
+//           name: "New York",
+//           inhabitants: 8_500_000,
+//         },
+//       },
+//     },
+//     {
+//       name: "Jeanne",
+//       age: 32,
+//       address: {
+//         city: {
+//           name: "Paris",
+//           inhabitants: 2_200_000,
+//         },
+//       },
+//     },
+//   ],
+// }
 ```
 
 As you can see denormalization is recursive, meaning that if a referenced entity has references of its own, they will be denormalized as well.
@@ -293,17 +392,28 @@ As you can see denormalization is recursive, meaning that if a referenced entity
 You can update a relation by simply replacing the optic with another one.  
 For example if Jeanne moves to Milan:
 
-```ts
+```ts twoslash
+// @include: cities
+const onUsers = createState([
+  {
+    name: "John",
+    age: 42,
+    address: { city: onNewYork },
+  },
+]);
+
+// ---cut---
+
 onUsers[1].address.city.set(onMilan);
 ```
 
 Referencing other entities with optics allows us to represent our state as a **graph**,
-where the **nodes** are the entities we build with `createState` and the **edges** are the optics relating them together.
+where the **nodes** are the entities we build with `createState` and the **edges** are the optics we put in the state to make the relations.
 
 While immutable state is great it however makes it hard to represent such graphs.  
-We usually have to resort to representing the relation with the the id of the target entity and then essentially joining the entities manually to get our denormalized result.  
-Optics makes the whole process **automatic**, **reactive** and **typesafe**, which is fundamental for applications that actually need client side state management,
-as most of them will eventually need to represent relations between entities.
+We usually have to resort to representing the relation with the the id of the target entity and then doing what's essentially a manual join to get our denormalized result.  
+Optics makes the whole process **automatic**, **reactive** and **type-safe**, which is fundamental for applications with non trivial client state,
+as most of them eventually need to represent relations between entities.
 
 :::caution cycles
 We need our graph to be **acyclic** to avoid infinite loops when denormalizing.  
@@ -340,13 +450,19 @@ And that's where lies the problem, **the component shouldn't have know the shape
 It's only job should be rendering a user, no matter where it comes from.
 
 :::info
-While we could split our component into _smart_ and _dumb_ ones (or _container_ and _presentational_) to keep the dumb component decoupled from the state,
-this pattern has fallen out of favour since the introduction of hooks due its verbosity, and the additional nesting it piles up in the component tree.
+We could split our component into _smart_ and _dumb_ ones (or _container_ and _presentational_) to keep the dumb component decoupled from the state,
+but at the cost of additional verbosity and nesting in the component tree.
 :::
 
 That's where optics come in, as they allow us to naturally decouple our components from the global state simply by passing them to the component's props:
 
-```tsx
+```tsx twoslash
+import { Optic, useOptic } from "@optics/react";
+// @include: cities
+type User = { name: string; age: number; address: { city: typeof onParis } };
+
+// ---cut---
+
 interface UserProps {
   onUser: Optic<User>;
 }
@@ -382,7 +498,30 @@ Listing dependencies in the props is always recommanded to avoid coupling and th
 Of course not all components can get their optics through their props as we have to start somewhere with some initial optics.
 Thus components close to the root usually import optics directly:
 
-```tsx {1}
+```tsx twoslash
+// @module: esnext
+// @filename: users.ts
+import { Optic } from "@optics/react";
+export type User = {
+  name: string;
+  age: number;
+  address: {
+    city: Optic<{
+      name: string;
+      inhabitants: number;
+    }>;
+  };
+};
+
+export const onUsers = {} as Optic<User[]>;
+
+// @filename: UserList.tsx
+// @module: esnext
+import { User } from "./users";
+import React, { FC } from "react";
+import { Optic, useOptic } from "@optics/react";
+const User = {} as FC<{ onUser: Optic<User> }>;
+// ---cut---
 import { onUsers } from "./users";
 
 const UserList = () => {
@@ -391,7 +530,7 @@ const UserList = () => {
   return (
     <ul>
       {users.map((user, index) => (
-        <li key={user.id}>
+        <li key={user.name}>
           <User onUser={onUsers[index]} />
         </li>
       ))}
@@ -410,8 +549,8 @@ That way **most leaf components can be decoupled** from the global state, which 
 Now that you've learned how to **decompose**, **compose** your state, and **decouple** your components from it,
 you know every important concept there is to know about state management with optics.
 
-To further your knowledge you can look through the following guides:
+To further your knowledge you can go through the following guides:
 
-- [Total vs partial](../Guides/total_partial): understand how a total optic will always yield a value while it might not be the case for a partial one.
-- [map/reduce](../Guides/map_reduce): learn how to focus multiple values at a time, and then how to **reduce** the focus back to a single value.
+- [total and partial](../Guides/total_partial): understand how a total optic will always yield a value while it might not be the case for a partial one.
+- [Map/Reduce](../Guides/map_reduce): learn how to focus multiple values at a time, and then how to **reduce** the focus back a single value.
 - [Forms](../Guides/forms): learn how to build performant and scalable forms by controlling your inputs with optics.
