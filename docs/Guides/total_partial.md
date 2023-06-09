@@ -9,13 +9,14 @@ An optic can either be `total` which means it's focused on **one value**, or `pa
 
 `createState` returns a total optic, it will never fail to focus on the root state:
 
-```ts
-const onUser = createState({ name: "Vincent" });
-// onName: Optic<{ name: string }, total>
-//                                 ^^^^^
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
 
+const onUser = createState({ name: "Vincent" });
+//    ^?
 const name = onUser.name.get();
-// name: string = 'Vincent'
+//    ^?
 ```
 
 :::info total is the default
@@ -29,71 +30,100 @@ A partial optic focuses on a value that might not exist.
 
 As an example let's create users with an optional `contact` property:
 
-```ts
-const initialUsers = [
+```twoslash include main
+import { createState } from "@optics/react";
+const initialUsers: { name: string; contact?: { phone: string } }[] = [
   { name: "Vincent", contact: { phone: "999-999-999" } },
   { name: "Gabin" },
 ];
-// initialUsers: { name: string; contact?: { phone: string } }[]
+const onUsers = createState(initialUsers);
+```
+
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
+
+const initialUsers: { name: string; contact?: { phone: string } }[] = [
+  { name: "Vincent", contact: { phone: "999-999-999" } },
+  { name: "Gabin" },
+];
 
 const onUsers = createState(initialUsers);
 ```
 
-Here the `contact` property is inferred as optional because it's not present for all users.  
-After that every optic we derive from `contact` will be partial because the value it is focused on might not exist:
+Here some users might not have any contact information, so the `contact` field is optional (cue the question mark).  
+When you have an optic focused on an optional (or nullable) property, then the new optics derived from it will be partial.
 
-```ts
+In our case it means every optics we derive from `contact` ends up partial:
+
+```ts twoslash
+// @include: main
+// ---cut---
+
 const onFirstUserPhone = onUsers[0].contact.phone;
-// onFirstUserPhone: Optic<string, partial>
-//                                 ^^^^^^^
+//    ^?
 
 const onSecondUserPhone = onUsers[1].contact.phone;
-// onSecondUserPhone: Optic<string, partial>
-//                                  ^^^^^^^
+//    ^?
 ```
 
-If an optic can't find the focused value it returns `undefined`, that means in our case the value returned by `get` is typed as `string | undefined`:
+If a partial optic can't find the focused value it returns `undefined`.  
+In our case it makes the value returned by `get` typed as `string | undefined`:
 
-```ts
+```ts twoslash
+// @include: main
+const onFirstUserPhone = onUsers[0].contact.phone;
+const onSecondUserPhone = onUsers[1].contact.phone;
+// ---cut---
+
 const vincentsPhone = onFirstUserPhone.get();
-// vincentsPhone: string | undefined === '999-999-999'
+//    ^?
 
 const gabinsPhone = onSecondUserPhone.get();
-// gabinsPhone: string | undefined === undefined
+//    ^?
+
+// vincentsPhone = "999-999-999"
+// gabinsPhone = undefined
 ```
 
-When trying to update a value that a partial fails to reach then it will simply no-op:
+When trying to update a value that a partial fails to reach then it simply no-op:
 
-```ts
+```ts twoslash
+// @include: main
+const onFirstUserPhone = onUsers[0].contact.phone;
+const onSecondUserPhone = onUsers[1].contact.phone;
+// ---cut---
 onSecondUserPhone.set("888-888-888");
 onSecondUserPhone.get(); // undefined
 ```
 
 :::tip
-On a plain javascript object, if you have to use the **optional chaining operator** `?.` on the path to a property,
-then using the same path on the optic means that you'll get a partial optic (no need to use the `?.` operator though).
+On a plain javascript object if you have to use the **optional chaining operator** `?.` on the path to a property,
+then using the same path on the optic will get you a partial optic (no need to use `?.` on optics though).
 
-```ts
+```ts twoslash
+// @include: main
+// ---cut---
 initialUsers[0].contact?.phone;
-//                     ^^
-// string | undefined
+//                       ^?
 
 onUsers[0].contact.phone;
-// Optic<string, partial>
+//                 ^?
 ```
 
 :::
 
 Deriving optics from properties of optional objects is not the only way to get partial optics.  
-For exemple with an optic focused on an array, the `findFirst` method returns a partial optic because no element of the array might match the predicate.  
-Or again the `if` method returns a partial optic because the condition might not be met by the focused value:
+For exemple with an optic focused on an array, the [`findFirst`](<../API/methods/array/findFirst()>) method returns a partial optic because no element of the array might match the predicate.  
+Or again the [`if`](<../API/methods/if()>) method returns a partial optic because the condition might not be met by the focused value:
 
-```ts
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
 const onNumber = createState(42);
-// onNumber: Optic<number>
 
 const onEvenNumber = onNumber.if((n) => n % 2 === 0);
-// onEvenNumber: Optic<number, partial>
+//    ^?
 
 onEvenNumber.get(); // 42
 
@@ -107,34 +137,24 @@ onEvenNumber.get(); // undefined
 
 `total` is a subtype of `partial`, meaning we can assign a total optic to a partial one (widening the type):
 
-```ts
+```ts twoslash
+import { createState, Optic, partial } from "@optics/react";
+// ---cut---
+
 const onNumber = createState(42);
-// onNumber: Optic<number, total>
-//                         ^^^^^
+
 const onNumberPartial: Optic<number, partial> = onNumber; // ✅ allowed
 ```
 
 However the reverse is not true, assigning a partial optic to a total one (narrowing the type) fails to compile:
 
-```ts
+```ts twoslash
+// @errors: 2322
+import { createState, Optic, total } from "@optics/react";
+// ---cut---
+
 const onEvenNumber = createState(42).if((n) => n % 2 === 0);
-// onEvenNumber: Optic<number, partial>
+//    ^?
 
-const onNumberTotal: Optic<number, total> = onEvenNumber; // ❌ type error
-```
-
-<br/>
-
-You can do that in a safe way by using the `default` method.  
-It will fallback to the default value you provided if the partial optic doesn't return a value:
-
-```ts
-const onEvenNumberTotal = onEvenNumber.default(0);
-// onEvenNumberTotal: Optic<number, total>
-
-onNumber.set(42);
-onEvenNumberTotal.get(); // 42
-
-onNumber.set(43);
-onEvenNumberTotal.get(); // 0
+const onNumberTotal: Optic<number, total> = onEvenNumber;
 ```
