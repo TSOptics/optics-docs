@@ -15,26 +15,29 @@ Optics are compositional in nature, making them a natural fit for component base
 
 ## Installation
 
-- Install the React version (requires React 18+):
-
 ```bash npm2yarn
 npm install @optics/react
 ```
 
-- **Or** install the framework agnostic core:
+(Requires React 18+)
+
+<details>
+  <summary>Other frameworks</summary>
+
+Adapters for different UI frameworks are planned as well.  
+In the meantime you can also use the framework agnostic version of the library:
 
 ```bash
 npm install @optics/state
 ```
 
-This library has been built around TypeScript's powerful inference capabilities, using it in strict mode is strongly recommended.
+</details>
 
-## Basic example
+This library has been built with TypeScript's type inference in mind, using it in strict mode is strongly recommended.
 
-### Creating a state
+## Usage
 
-In our application let's start by creating a state holding a list of users.
-For that let's call `createState` and pass it an initial value.
+To create a global state call the `createState` function and pass it an initial value:
 
 ```twoslash include main
 import { createState } from "@optics/react";
@@ -52,16 +55,10 @@ const onUsers = createState([
 // @include: main
 ```
 
-`createState` returns an **optic**.  
-An optic is a **reference** to a piece of application state and it allows us to read, update this piece as well as subscribe to it.
+It returns us an **optic**:
+a **reference** to a piece of application state that allows us to read, update this state as well as subscribe to it.
 
-:::tip
-You're not restricted to a single global state, you can call `createState` as many times as want.
-:::
-
-### Using optics
-
-- Calling `get` on the optic let's us read the state:
+Read the state with `get`:
 
 ```ts twoslash
 // @include: main
@@ -69,7 +66,7 @@ You're not restricted to a single global state, you can call `createState` as ma
 onUsers.get(); // [{ name: "John", age: 42, address: { ... } }]
 ```
 
-- Calling `set` on the optic let's us update the state:
+Update it with `set`:
 
 ```ts twoslash
 // @include: main
@@ -87,6 +84,21 @@ onUsers.set((prev) => [
 onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jane", age: 32, address: { ... } }]
 ```
 
+Subscribe to it with `subscribe`:
+
+```ts twoslash
+// @include: main
+// ---cut---
+
+onUsers.subscribe((users) => {
+  console.log("users changed: ", users);
+});
+```
+
+:::tip
+You're not restricted to a single global state, you can call `createState` as many times as want.
+:::
+
 ### Deriving new optics
 
 Where it gets interesting is that, from this base optic, you can get new ones focused on different parts of your state !
@@ -100,11 +112,6 @@ For exemple let's get an optic that focuses on the city of the first user in our
 const onCity = onUsers[0].address.city;
 //    ^?
 ```
-
-:::tip
-Deriving a new optic looks just like accessing properties of an object !  
-You get the same **type-safety and code completion** in your editor as with plain javascript objects.
-:::tip
 
 Now we can directly read and update the city of the first user with this optic:
 
@@ -138,27 +145,29 @@ const newState = [
 ];
 ```
 
-:::tip
 Using optics saves us from quite the boilerplate when updating deeply nested data !
-:::
 
 </details>
 
 Optics let you focus on **narrower parts of your state**, allowing you to read and update these parts independently of the rest.
 
-More examples:
+Another example:
 
 ```ts twoslash
 // @include: main
 // ---cut---
-onUsers[0].address.city.get(); // "Boston"
-
 const onJaneStreet = onUsers[1].address.street;
 //    ^?
+
 onJaneStreet.number.set(42);
 
 onJaneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
 ```
+
+:::tip
+Deriving a new optic looks just like accessing properties of an object !  
+You get the same **type-safety** and **code completion** in your editor as with plain javascript objects.
+:::tip
 
 :::info
 For now don't worry about the `total` type parameter, you'll be able to learn about that later in the [total and partial](../Guides/total_partial) section of the docs.
@@ -182,26 +191,14 @@ const StreetForm = () => {
 
   return (
     <div>
-      Street
-      <label>
-        number:
-        <input
-          value={street.number}
-          type="number"
-          onChange={(e) =>
-            setStreet((prev) => ({ ...prev, number: parseInt(e.target.value) }))
-          }
-        />
-      </label>
-      <label>
-        name:
-        <input
-          value={street.name}
-          onChange={(e) =>
-            setStreet((prev) => ({ ...prev, name: e.target.value }))
-          }
-        />
-      </label>
+      <input
+        value={street.number}
+        type="number"
+        onChange={(e) =>
+          setStreet((prev) => ({ ...prev, number: parseInt(e.target.value) }))
+        }
+      />
+      {street.name}
     </div>
   );
 };
@@ -219,7 +216,7 @@ But you can use optics directly instead, especially if you're only updating a su
 // @include: main
 const onJaneStreet = onUsers[1].address.street;
 // ---cut---
-<input onChange={(e) => onJaneStreet.name.set(e.target.value)} />;
+<input onChange={(e) => onJaneStreet.number.set(parseInt(e.target.value))} />;
 ```
 
 </details>
@@ -247,12 +244,13 @@ const onJane = onUsers[1];
 // ---cut---
 
 onJane.age.set((prev) => prev + 1);
-// jane's street reference hasn't changed, StreetForm doesn't re-render
+
+// jane's street reference hasn't changed, StreetForm doesn't re-render 🚫
 ```
 
 ### Pass optics in props
 
-Instead of referencing the optic directly, the component could accept one **via its props**.
+Instead of referencing the optic directly, the component can accept one **via its props**.
 
 ```tsx twoslash
 import { useOptic, Optic } from "@optics/react";
@@ -293,5 +291,4 @@ const StreetForm = ({ onStreet }: Props) => {
 
 ## Next steps
 
-Now you know the basics and can start to use optics effectively, but that's not all there is to it.  
-We suggest you go through the [**core concepts**](./core-concepts) to have a better grasp of the notions introduced here and learn about optic composition.
+Now that you know the basics of optics you can go through the [**core concepts**](./core-concepts) to have a better grasp of the notions introduced here and learn about optic composition.
