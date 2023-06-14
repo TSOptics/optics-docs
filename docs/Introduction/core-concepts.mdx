@@ -9,7 +9,7 @@ import CodeBlock from "@theme/CodeBlock";
 
 As explained in the previous section it is useful to think of optics as references.  
 In fact in Haskell, where the concept originated, they are often called **functional references**.
-They point to parts of your application's immutable state and let's you interact with it.  
+They point to parts of your application's immutable state and let you interact with it.  
 This parallel is useful to grasp the core concepts of optics because just like references:
 
 - they can be **broken down** into smaller parts by calling properties of the object they point to.
@@ -125,7 +125,7 @@ Here `onOldestUser` will always point to the oldest user, so when we age poor Je
 
 While `max` is only available when the focused type is an array, some methods are available to every optic.
 
-One such method is [`convert`](<../API/Methods/convert()>). It let's you perform a lossless conversion from the focused type to another.  
+One such method is [`convert`](<../API/Methods/convert()>). It lets you perform a lossless conversion from the focused type to another.  
 For example if we wanted to manipulate the user's street as a tuple instead of an object:
 
 ```ts twoslash
@@ -446,8 +446,8 @@ We can't **reuse the component** to render any another user.
 Coupling hurts reusability but also **testability**: we can't easily render the component in isolation (inside a Storybook, a unit test, ...)
 since we need to carry with us the surrounding context that the selector needs to get the data.
 
-And that's where lies the problem, **the component shouldn't have know the shape of the global state**.  
-It's only job should be rendering a user, no matter where it comes from.
+And that's where lies the problem, **the component shouldn't have to know the shape of the global state**.  
+Its only job should be rendering a user, no matter where it comes from.
 
 :::info
 We could split our component into _smart_ and _dumb_ ones (or _container_ and _presentational_) to keep the dumb component decoupled from the state,
@@ -491,7 +491,7 @@ test("User renders a user", () => {
 });
 ```
 
-Listing dependencies in the props is always recommanded to avoid coupling and there's no reason that it should be otherwise for global state !
+Listing dependencies in the props is always recommended to avoid coupling and there's no reason that it should be otherwise for global state !
 
 #### Roots and leaves
 

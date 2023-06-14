@@ -11,7 +11,7 @@ function useOptic<T>(optic: Optic<T>): [T, Dispatch<SetStateAction<T>>];
 
 ---
 
-This hook let's you read and modify the slice of store focused by an optic.  
+This hook lets you read and modify the slice of store focused by an optic.  
 Just like React `useState` it returns the value and a setter to change it.
 
 The component will rerender each time the focused value changes.
