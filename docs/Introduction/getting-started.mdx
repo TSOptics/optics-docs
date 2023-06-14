@@ -75,13 +75,13 @@ Update it with `set`:
 onUsers.set((prev) => [
   ...prev,
   {
-    name: "Jane",
+    name: "Jeanne",
     age: 32,
     address: { city: "Paris", street: { name: "Rue de Rivoli", number: 1 } },
   },
 ]);
 
-onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jane", age: 32, address: { ... } }]
+onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jeanne", age: 32, address: { ... } }]
 ```
 
 Subscribe to it with `subscribe`:
@@ -156,12 +156,12 @@ Another example:
 ```ts twoslash
 // @include: main
 // ---cut---
-const onJaneStreet = onUsers[1].address.street;
+const onJeanneStreet = onUsers[1].address.street;
 //    ^?
 
-onJaneStreet.number.set(42);
+onJeanneStreet.number.set(42);
 
-onJaneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
+onJeanneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
 ```
 
 :::tip
@@ -182,12 +182,12 @@ Call the `useOptic` hook with an optic, similarily to `useState` it returns a tu
 ```tsx twoslash
 // @include: main
 
-const onJaneStreet = onUsers[1].address.street;
+const onJeanneStreet = onUsers[1].address.street;
 // ---cut---
 import { useOptic } from "@optics/react";
 
 const StreetForm = () => {
-  const [street, setStreet] = useOptic(onJaneStreet);
+  const [street, setStreet] = useOptic(onJeanneStreet);
 
   return (
     <div>
@@ -214,9 +214,9 @@ But you can use optics directly instead, especially if you're only updating a su
 
 ```tsx twoslash
 // @include: main
-const onJaneStreet = onUsers[1].address.street;
+const onJeanneStreet = onUsers[1].address.street;
 // ---cut---
-<input onChange={(e) => onJaneStreet.number.set(parseInt(e.target.value))} />;
+<input onChange={(e) => onJeanneStreet.number.set(parseInt(e.target.value))} />;
 ```
 
 </details>
@@ -227,11 +227,11 @@ The component will re-render when the street changes, whether it is changed from
 
 ```ts twoslash
 // @include: main
-const onJaneStreet = onUsers[1].address.street;
+const onJeanneStreet = onUsers[1].address.street;
 // ---cut---
 
 // outside of the component
-onJaneStreet.number.set((prev) => prev + 1);
+onJeanneStreet.number.set((prev) => prev + 1);
 
 // StreetFrom re-renders 🔄
 ```
@@ -240,12 +240,12 @@ However the component will not re-render if an unrelated part of the state chang
 
 ```ts twoslash
 // @include: main
-const onJane = onUsers[1];
+const onJeanne = onUsers[1];
 // ---cut---
 
-onJane.age.set((prev) => prev + 1);
+onJeanne.age.set((prev) => prev + 1);
 
-// jane's street reference hasn't changed, StreetForm doesn't re-render 🚫
+// Jeanne's street reference hasn't changed, StreetForm doesn't re-render 🚫
 ```
 
 ### Pass optics in props
@@ -284,7 +284,7 @@ const StreetForm = ({ onStreet }: Props) => {
   {/* Form for john's street */}
   <StreetForm onStreet={onUsers[0].address.street} />
 
-  {/* Form for jane's street */}
+  {/* Form for Jeanne's street */}
   <StreetForm onStreet={onUsers[1].address.street} />
 </>;
 ```

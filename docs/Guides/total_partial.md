@@ -51,7 +51,7 @@ const initialUsers: { name: string; contact?: { phone: string } }[] = [
 const onUsers = createState(initialUsers);
 ```
 
-Here some users might not have any contact information, so the `contact` field is optional (cue the question mark).  
+Here some users might not have any contact information, so the `contact` field is optional (hence the question mark).  
 When you have an optic focused on an optional (or nullable) property, then the new optics derived from it will be partial.
 
 In our case it means every optics we derive from `contact` ends up partial:
