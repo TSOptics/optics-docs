@@ -496,7 +496,7 @@ Listing dependencies in the props is always recommended to avoid coupling and th
 #### Roots and leaves
 
 Of course not all components can get their optics through their props as we have to start somewhere with some initial optics.
-Thus components close to the root usually import optics directly:
+For example the `UserList` component is **close to the root** and imports the `onUsers` optic directly:
 
 ```tsx twoslash
 // @module: esnext
@@ -539,10 +539,10 @@ const UserList = () => {
 };
 ```
 
-But now that we have the optic imported we can derive new ones from it and pass them down to the `User` elements.  
-In turn we can imagine that the `User` component derives an optic focused on the user's street and pass it down to a `StreetForm` element, etc ...
+But now that we have this optic the component can derive new optics for each user and pass them down to the `User` component, which if you remember takes one through a `onUser` prop.  
+In turn the `User` component itself derives from its optic a new one focused on the user's street and pass it down to a `StreetForm` component, etc ...
 
-That way **most leaf components can be decoupled** from the global state, which is convenient as they are the ones that usually need to be reused, tested or documented in stories.
+That way once a root component has imported an optic, **most components below it** can get their optics through their props and **stay decoupled from the global state**, letting you reuse them elsewhere, test them, render them in stories, etc.
 
 ## Conclusion
 
