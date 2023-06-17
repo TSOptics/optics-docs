@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # Total and partial optics
 
-An optic can either be `total` which means it's focused on **one value**, or `partial` that is focused on **zero or one value**.
+An optic can either be `total` which means it's focused on **one value**, or `partial`: focused on **zero or one value**.
 
 `createState` returns a total optic, it will never fail to focus on the root state:
 
@@ -67,8 +67,9 @@ const onSecondUserPhone = onUsers[1].contact.phone;
 //    ^?
 ```
 
-If a partial optic can't find the focused value it returns `undefined`.  
-In our case it makes the value returned by `get` typed as `string | undefined`:
+An object being nullable doesn't mean we shouldn't be able to focus values inside it.  
+But we should still be made aware of the fact that getting the value could yield `undefined`, and that's what `partial` is for.  
+A partial optic returns `undefined` if one of the value in the path is not present (in our case `contact`), that's why the return type of `get` is <code>T&nbsp;|&nbsp;undefined</code>:
 
 ```ts twoslash
 // @include: main
@@ -94,6 +95,7 @@ const onFirstUserPhone = onUsers[0].contact.phone;
 const onSecondUserPhone = onUsers[1].contact.phone;
 // ---cut---
 onSecondUserPhone.set("888-888-888");
+
 onSecondUserPhone.get(); // undefined
 ```
 

@@ -4,32 +4,32 @@ sidebar_position: 1
 
 # Motivation
 
-Treating application state as **immutable** has become a mainstay in web and mobile application developpment,
-in part because immutability makes it easy **historicize**, **rollback** the state and most importantly **compare** versions of it,
-which is the secret sauce behind the reactivity of UI frameworks like React.  
-Even beyond application state immutability makes our code more predictable, composable, testable and **easier to reason about** when compared to uncontrolled mutability.
+Treating application state as [**immutable**](https://en.wikipedia.org/wiki/Immutable_object) has become a mainstay in web and mobile application developpment,
+in part because immutability makes it easy to **historicize**, **rollback** the state and most importantly **compare** versions of it,
+which is the secret sauce behind the reactivity of UI frameworks like React and why they forbid mutations.  
+Even beyond application state, immutability makes our code more predictable, composable, testable and **easier to reason about** when compared to uncontrolled mutability.
 
-Unfortunately JavaScript wasn’t built around it making the ergonomics of immutability often significantly worse than using a mutative approach to state:
+Unfortunately JavaScript wasn’t built around it, making the ergonomics of immutability often significantly worse than using a mutative approach to state:
 
-- First updating immutable state is hard, and it gets worse as our state grows over time.
-  We have to make a shallow copy of every level up to the part we want to update. It drowns the signal in noise and makes it easy to introduce accidental mutations in the process, causing particularly hard to track bugs.
+- First, updating immutable state is hard, and it gets worse as our state grows over time.
+  We have to make a shallow copy of every level up to the part we want to update. It drowns the signal in noise and makes it easy to introduce accidental mutations in the process, causing particularly hard-to-track bugs.
 - Representing relations with plain JavaScript objects is easy, just reference an object from another and you have a graph.
   Mutate an object and you'll see the change when using other objects referencing it.  
   When it comes to reactive immutable state it's unfortunately not that simple. You have to **normalize the state**, represent relations with ids and **manually denormalize** (or join) the state when consuming it.  
   The process is tedious, error prone, type-unsafe and doesn't scale well.
 - Finally an issue creeping into most apps dependent on global immutable state is that the components, even deep in the tree, end up **tightly coupled** to it.  
-  Since it's hard to decompose global state and declare dependencies to it in the props you end up **explicitely subscribing** to the context/store in the component, introducing accidental coupling in the process.
+  Since it's hard to decompose global state and declare dependencies to it in the props you end up **explicitly subscribing** to the context/store in the component, introducing accidental coupling in the process.
   That means you can't reuse the component elsewhere as is, you'd have to split it in two to isolate the subscription from the reusable part.
   Also you can't easily test it in isolation without having to mock at least a part of the global state it depends on.
 
-It turns out functional programming, where everything is immutable, has found a solution to some of these issues a long time ago in the form of **optics**.  
+It turns out that functional programming, where everything is immutable, has found a solution to some of these issues a long time ago in the form of **optics**.  
 An optic is a **composable reference**, allowing you to focus anywhere in an immutable data structure to read and update it.
 
 Turning optics into observables that can be subscribed to makes them an **exceptionally good fit** for application state management.  
-It also helps that optics are surprisingly easy to represent in TypeScript,
+It also helps that optics are surprisingly easy to represent in TypeScript;
 thanks to the language type-level capabilities and ES6 Proxies they are easier to use than even in the languages they originated from.
 
-They help bridge the ergonomics gap with mutable state by making it as easy to **update deeply nested values**,
+They help bridge the ergonomics gap with mutable state by making it easy to **update deeply nested values**,
 to represent **relations between entities** as part of a graph,
 or again to decompose the state allowing our components to **independently read and update its parts**.  
 All of this while preserving the props of immutability.
