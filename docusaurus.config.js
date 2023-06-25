@@ -9,7 +9,7 @@ module.exports = {
   baseUrl: "/optics-docs/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon/favicon.ico",
+  favicon: "img/favicon.svg",
   organizationName: "TSOptics", // Usually your GitHub org/user name.
   projectName: "optics-docs", // Usually your repo name.
   trailingSlash: false,
@@ -17,8 +17,8 @@ module.exports = {
     navbar: {
       title: "Optics",
       logo: {
-        src: "img/react-optics.svg",
-        srcDark: "img/react-optics-dark.svg",
+        src: "img/optics-light.svg",
+        srcDark: "img/optics-dark.svg",
       },
       items: [
         {
@@ -106,6 +106,7 @@ module.exports = {
         theme: {
           customCss: require.resolve("./src/css/custom.css"),
         },
+        pages: {},
       },
     ],
     [

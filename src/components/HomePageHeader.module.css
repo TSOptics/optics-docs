@@ -5,6 +5,18 @@
   overflow: hidden;
 }
 
+.logo {
+  margin-bottom: 1rem;
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-width: 5px;
+  border-color: red;
+}
+
 @media screen and (max-width: 966px) {
   .heroBanner {
     padding: 2rem;
@@ -19,4 +31,17 @@
 
 .emphasis {
   color: black;
+}
+
+.cta {
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-font-color-base);
+  border-radius: 1000px;
+  padding: 0.7rem 2rem;
+  color: white
+}
+
+.cta:hover {
+  opacity: 0.8;
+  color: white  
 }
