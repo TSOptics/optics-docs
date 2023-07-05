@@ -21,7 +21,7 @@ export default function HomePageHeader() {
         height={120}
       />
       <h1 className="hero__title">{siteConfig.title}</h1>
-      <p className="hero__subtitle">
+      <p className={clsx(["hero__subtitle", styles.subtitle])}>
         Scalable state management for TypeScript applications
       </p>
       <div className={styles.buttons}>
