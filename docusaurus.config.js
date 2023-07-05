@@ -112,7 +112,7 @@ module.exports = {
     [
       "docusaurus-preset-shiki-twoslash",
       {
-        themes: ["solarized-dark"],
+        themes: ["github-dark", "github-light"],
       },
     ],
   ],
