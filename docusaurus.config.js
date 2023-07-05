@@ -6,7 +6,7 @@ module.exports = {
   title: "Optics",
   tagline: "Composable state management for TypeScript applications",
   url: "https://tsoptics.github.io",
-  baseUrl: "/optics-docs/",
+  baseUrl: "/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.svg",
