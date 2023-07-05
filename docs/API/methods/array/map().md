@@ -11,7 +11,7 @@ Optic<A extends any[]>.map: () => Optic<A[number], mapped>;
 
 ---
 
-This method returns a new [mapped optic](<../../guides/mapped optics()>) from an optic focused on an array.
+This method returns a new [mapped optic](../../../Guides/map_reduce) from an optic focused on an array.
 
 ### Example:
 

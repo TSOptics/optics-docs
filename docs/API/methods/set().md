@@ -12,7 +12,7 @@ Optic<A, _, S>.set: (a: A | ((prev: A) => A)) => void;
 ---
 
 This method allows you to update the value focused by the optic.  
-It is equivalent to the setter function returned by [`useOptic`](<../hooks/useOptic()>) but unlike `useOptic` you can use it outside of React components and hooks.
+It is equivalent to the setter function returned by [`useOptic`](<../React/useOptic()>) but unlike `useOptic` you can use it outside of React components and hooks.
 
 ### Example:
 

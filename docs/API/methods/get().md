@@ -14,7 +14,7 @@ Optic<A, mapped, S>.get: () => A[];
 ---
 
 This method returns the value focused by the optic.  
-Unlike [`useOptic`](<../hooks/useOptic()>) you can use it to retrieve the focused value outside of React components and hooks.
+Unlike [`useOptic`](<../React/useOptic()>) you can use it to retrieve the focused value outside of React components and hooks.
 
 ### Example:
 
