@@ -3,19 +3,16 @@ title: .refine()
 sidebar_position: 6
 ---
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-
 # .refine(refiner): Optic
 
 ```ts
-Optic<A>.refine = <B>(refiner: (a: A) => B | false) => Optic<B, partial | mapped>;
+Optic<A>.refine = <B>(refiner: (a: A) => B | false) => Optic<B, partial>;
 ```
 
 ---
 
 This method allows you to _narrow_ the type focused by the original optic.  
-It returns a new partial optic focused on the original value in its narrowed type or undefined if the narrowing failed.
+It returns a new partial optic focused on the original value in its narrowed type, or **undefined** if the narrowing failed.
 
 The `refiner` function must return the original value in its narrowed type or `false` if it can't be narrowed to this type.
 
@@ -23,45 +20,56 @@ The `refiner` function must return the original value in its narrowed type or `f
 
 ### - On the branch of a discriminated union
 
-```ts
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
+
 type Result<T> =
   | { type: "success"; value: T }
   | { type: "failure"; errorMessage: string };
 
 const onResult = createState<Result<number>>({ type: "success", value: 42 });
 
-const [, setResult] = useOptic(onResult);
+const onSuccess = onResult.refine((res) => res.type === "success" && res);
+//    ^?
 
-// highlight-start
-const onSuccess = onResult.refine(
-  (result) => result.type === "success" && result
-);
-// onSuccess: Optic<{ type: 'success'; value: number }, partial>
-// highlight-end
+onSuccess.get(); // { type: 'success', value: 42 }
 
-const [success] = useOptic(onSuccess);
-// success === { type: 'success', value: 42 }
+onResult.set({ type: "failure", errorMessage: "Catastrophic meltdown" });
 
-setResult({ type: "failure", errorMessage: "Catastrophic meltdown" });
-// success === undefined
+onSuccess.get(); // undefined
 ```
 
-### - On a javascript built-in type
+### - On a built-in type
 
-```ts
-const onUnknownValue = createState<unknown>();
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
 
-const onNumber = onUnknownValue.refine(
-  (unknownValue) => typeof unknownValue === "number" && unknownValue
-);
-// onNumber: Optic<number, partial>
+const onUnknownValue = createState<unknown>(42);
+
+const onNumber = onUnknownValue.refine((val) => typeof val === "number" && val);
+//    ^?
 ```
 
-### - On a custom type with a type guard
+### - On a user-defined type with a type-guard
 
-```ts
-function isMyType(value: any): value is MyType;
+```ts twoslash
+import { createState } from "@optics/react";
+declare const untypedInitUser: () => any;
+// ---cut---
 
-const onMyType = onState.refine((value) => isMyType(value) && value);
-// onMyType: Optic<MyType, partial>
+type User = {
+  userName: string;
+};
+
+function isUser(value: unknown): value is User {
+  return typeof (value as User).userName === "string";
+}
+
+const onState = createState(untypedInitUser());
+//    ^?
+
+const onMyType = onState.refine((value) => isUser(value) && value);
+//    ^?
 ```
