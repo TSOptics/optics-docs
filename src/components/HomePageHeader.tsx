@@ -4,19 +4,19 @@ import clsx from "clsx";
 import Link from "@docusaurus/Link";
 import styles from "./HomePageHeader.module.css";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import { useColorMode } from "@docusaurus/theme-common";
+import ThemedImage from "@theme/ThemedImage";
 
 export default function HomePageHeader() {
   const { siteConfig } = useDocusaurusContext();
-  const { isDarkTheme } = useColorMode();
 
   return (
     <header className={styles.heroBanner}>
-      <img
+      <ThemedImage
+        sources={{
+          dark: useBaseUrl("img/optics-dark.svg"),
+          light: useBaseUrl("img/optics-light.svg"),
+        }}
         className={styles.logo}
-        src={useBaseUrl(
-          isDarkTheme ? "/img/optics-dark.svg" : "/img/optics-light.svg"
-        )}
         width={120}
         height={120}
       />

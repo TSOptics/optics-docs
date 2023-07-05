@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./HomePageExample.module.css";
 import clsx from "clsx";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import { useColorMode } from "@docusaurus/theme-common";
+import ThemedImage from "@theme/ThemedImage";
 
 interface HomePageExampleProps {
   title: string;
@@ -17,18 +17,17 @@ const HomePageExample = ({
   snippetName,
   even,
 }: HomePageExampleProps) => {
-  const { isDarkTheme } = useColorMode();
-
   return (
     <div className={clsx([styles.container, even && styles.even])}>
       <h1 className={styles.title}>{title}</h1>
       <div className={clsx([styles.row, even && styles.evenRow])}>
         <p className={styles.description}>{description}</p>
-        <img
+        <ThemedImage
           className={styles.snippet}
-          src={useBaseUrl(
-            `snippets/${snippetName}-${isDarkTheme ? "dark" : "light"}.png`
-          )}
+          sources={{
+            dark: useBaseUrl(`snippets/${snippetName}-dark.png`),
+            light: useBaseUrl(`snippets/${snippetName}-light.png`),
+          }}
           style={{ width: snippetName === "graph" ? "35%" : "45%" }}
         />
       </div>
