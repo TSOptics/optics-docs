@@ -1,35 +1,32 @@
 ---
-title: .filter()
+title: .reduceFilter()
 sidebar_position: 13
 ---
 
-# .filter(predicate): Optic
+# .reduceFilter(predicate): Optic
 
 ```ts
-Optic<A, mapped>.filter: (predicate: (a: A) => boolean) => Optic<A, mapped>;
+Optic<A, mapped>.reduceFilter: (predicate: (a: A) => boolean) => Optic<A, mapped>;
 ```
 
 Analogous to [Array.filter](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array/filter), this method returns a mapped optic focused on the elements of the original mapped optic that satisfy the predicate.
 
 ### Example:
 
-```ts
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
+
 const onCountries = createState([
   { name: "Spain", continent: "Europe" },
   { name: "Sénégal", continent: "Africa" },
   { name: "Columbia", continent: "South America" },
   { name: "Gabon", continent: "Africa" },
 ]);
-// onCountries: Optic<{ name: string; continent: string }>;
 
 const onAfricanCountries = onCountries
   .map()
-  .filter((country) => country.continent === "Africa");
-// onAfricanCountries: Optic<{ name: string; continent: string }, mapped>
+  .reduceFilter((country) => country.continent === "Africa");
 
-const [africanCountries, setAfricanCountries] = useOptic(onAfricanCountries);
-// africanCountries = [
-//    { name: 'Sénégal', continent: 'Africa' },
-//    { name: 'Gabon', continent: 'Africa' }
-// ];
+onAfricanCountries.name.get(); // ['Sénégal', 'Gabon']
 ```

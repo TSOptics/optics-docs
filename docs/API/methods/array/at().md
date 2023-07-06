@@ -6,26 +6,23 @@ sidebar_position: 12
 # .at(index): Optic
 
 ```ts
-Optic<T[]>.at: (index: number) => Optic<T>;
+Optic<A extends any[]>.at: (index: number) => Optic<A[number]>;
 ```
 
 ---
 
 This method returns an optic focused on the element at the provided index in the focused array.
+Just like JavaScript's [Array.at](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/at) a negative index counts back from the end of the array.
 
-```ts
-const onNumberArrays = createState([
-  [78, 90, 4, 7],
-  [10, 7],
-  [9],
-  [789, 42, 90],
-]);
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
 
-const onNumbers = onNumberArrays.map().map();
-// onNumbers: Optic<number, mapped>
-// onNumbers.get() = [78, 90, 4, 7, 10, 7, 9, 789, 42, 90]
+const onNumberArray = createState([78, 90, 4, 7, 10, 789, 42, 90]);
 
-const on5th = onNumbers.at(4);
-// on5th: Optic<number, partial>;
-// on5th.get() = 10
+const onFifthElement = onNumberArray.at(4);
+//    ^?
+onFifthElement.get(); // 10
+
+onNumberArray.at(-2).get(); // 42
 ```

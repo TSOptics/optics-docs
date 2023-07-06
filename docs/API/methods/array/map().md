@@ -15,13 +15,16 @@ This method returns a new [mapped optic](../../../Guides/map_reduce) from an opt
 
 ### Example:
 
-```ts
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
+
 const onArray = createState([1, 2, 3, 4, 5]);
 
 const onNumbers = onArray.map();
-// onNumbers: Optic<number, mapped>
+//    ^?
 
-const [numbers, setNumber] = useOptic(onNumbers);
-setNumber((prev) => prev * 2);
-// numbers = [2, 4, 6, 8, 10]
+onNumbers.set((prev) => prev * 2);
+
+onNumbers.get(); // [2, 4, 6, 8, 10]
 ```

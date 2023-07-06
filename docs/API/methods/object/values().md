@@ -6,16 +6,19 @@ sidebar_position: 10
 # .values(): Optic
 
 ```ts
-Optic<A extends Record<string, infer Value>>.values: () => Optic<Value, mapped>;
+Optic<A extends Record<string, infer Value>>.values: () => Optic<Value[]>;
 ```
 
 ---
 
-Analogous to [Object.values](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/values), this method returns a [mapped optic](<../../guides/mapped optics()>) focused on the object's values.
+Analogous to [Object.values](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/values), this method returns an optic focused on the object's values.
 
 ### Example:
 
-```ts
+```ts twoslash
+import { createState } from "@optics/react";
+// ---cut---
+
 const onCapitals = createState<Record<string, string>>({
   France: "paris",
   Italy: "roma",
@@ -23,12 +26,11 @@ const onCapitals = createState<Record<string, string>>({
 });
 
 const onValues = onCapitals.values();
-// onValues: Optic<string, mapped>
+//    ^?
 
-const [values, setValue] = useOptic(onValues);
-// values = ['paris', 'roma', 'canberra'];
+onValues.get(); // ['paris', 'roma', 'canberra'];
 
-setValue((prev) => prev[0].toUpperCase() + s.slice[1]);
-// values = ['Paris', 'Roma', 'Canberra'];
-// onCapitals.get() = { France: 'Paris', Italy: 'Roma', Australia: 'Canberra' };
+onValues.map().set((prev) => prev[0].toUpperCase() + prev.slice(1));
+
+onCapitals.get(); // { France: "Paris", Italy: "Roma", Australia: "Canberra" }
 ```
