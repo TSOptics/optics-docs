@@ -9,14 +9,14 @@ const features = [
     title: "Focus anywhere in the state",
     description: (
       <>
-        Read, update and subscribe anywhere in your state with optics.
+        <b>Read, update and subscribe</b> anywhere in your state with optics.
         <br />
         <br />
         With properties or methods, <b>decompose</b> your state as suits you
         with full type-safety and code completion.
         <br />
         <br />
-        Update deeply nested values effortlessly.
+        Optics make updating <b>deeply nested</b> values effortless.
       </>
     ),
     snippet: "focus",

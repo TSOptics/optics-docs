@@ -20,7 +20,7 @@ const HomePageExample = ({
   return (
     <div className={clsx([styles.container, even && styles.even])}>
       <h1 className={styles.title}>{title}</h1>
-      <div className={clsx([styles.row, even && styles.evenRow])}>
+      <div className={even ? styles.evenRow : styles.odd}>
         <p className={styles.description}>{description}</p>
         <ThemedImage
           className={styles.snippet}
@@ -28,7 +28,6 @@ const HomePageExample = ({
             dark: useBaseUrl(`snippets/${snippetName}-dark.png`),
             light: useBaseUrl(`snippets/${snippetName}-light.png`),
           }}
-          style={{ width: snippetName === "graph" ? "35%" : "45%" }}
         />
       </div>
     </div>
