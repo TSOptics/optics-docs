@@ -6,17 +6,19 @@ import HomePageExample from "../components/HomePageExample";
 
 const features = [
   {
-    title: "Focus anywhere in the state",
+    title: "Focus anywhere in your state",
     description: (
       <>
-        <b>Read, update and subscribe</b> anywhere in your state with optics.
+        <b>Read, update and subscribe</b> anywhere in the global state with
+        optics.
         <br />
         <br />
         With properties or methods, <b>decompose</b> your state as suits you
         with full type-safety and code completion.
         <br />
         <br />
-        Optics make updating <b>deeply nested</b> values effortless.
+        With optics, focusing on <b>deeply nested</b> values makes updating them
+        effortless.
       </>
     ),
     snippet: "focus",
@@ -25,12 +27,12 @@ const features = [
     title: "Decouple components from global state",
     description: (
       <>
-        Props are the public interface of the component, put its dependencies to
-        global state here as well !
+        Declare optics in the component's props to{" "}
+        <b>explicit its dependencies</b> to external state.
         <br />
         <br />
-        The component declares <b>what</b> it needs, and doesn't care about{" "}
-        <b>how</b> to get to it.
+        The component describes <b>what</b> it needs from the global state, not{" "}
+        <b>how</b> or from <b>where</b> it gets it.
         <br />
         <br />
         Components <b>decoupled</b> from external state stay <b>composable</b>{" "}
@@ -45,12 +47,16 @@ const features = [
       <>
         Use optics to express <b>relations</b> between entities.
         <br />
-        Represent your state as a <b>graph</b> that is dynamic, type-safe and
-        reactive.
+        <br />
+        No more plain ids and manual denormalization, optics act like{" "}
+        <b>references to other entities</b> in your state.
+        <br />
+        Lets you represent your state as a <b>graph</b> that is dynamic,
+        type-safe and reactive.
         <br />
         <br />
-        Anywhere you focus in the graph you can read and subscribe to an{" "}
-        automatically <b>denormalized</b> representation.
+        Anywhere you focus in the graph get the value automatically{" "}
+        <b>denormalized</b> for you.
       </>
     ),
     snippet: "graph",
