@@ -14,6 +14,11 @@ module.exports = {
   projectName: "optics-docs", // Usually your repo name.
   trailingSlash: false,
   themeConfig: {
+    algolia: {
+      appId: "WPKS0ARPZ0",
+      apiKey: "75cd44ec8228bd29f7dba141dfa13fb1",
+      indexName: "optics",
+    },
     navbar: {
       title: "Optics",
       logo: {
