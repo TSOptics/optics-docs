@@ -6,12 +6,12 @@ sidebar_position: 5
 # .compose(pureOptic): Optic
 
 ```ts
-Optic<B>.compose: <C>(pureOptic: PureOptic<C, _, B>) => Optic<C>;
+Optic<A>.compose: <B>(pureOptic: PureOptic<B, _, A>) => Optic<B>;
 ```
 
 ---
 
-On an optic **focused on B**, the compose method takes a [pure optic](../../Guides/pure_optic) **focused on C from B** and returns a new optic **focused on C**.
+On an optic **focused on A**, the compose method takes a [pure optic](../../Guides/pure_optic) **focused on B from A** and returns a new optic **focused on B**.
 
 ### Example:
 
