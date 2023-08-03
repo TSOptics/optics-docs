@@ -5,7 +5,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 module.exports = {
   title: "Optics",
   tagline: "Composable state management for TypeScript applications",
-  url: "https://optics.page",
+  url: "https://wwww.optics.page",
   baseUrl: "/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
