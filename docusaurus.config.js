@@ -12,7 +12,7 @@ module.exports = {
   favicon: "img/favicon.svg",
   organizationName: "TSOptics", // Usually your GitHub org/user name.
   projectName: "optics-docs", // Usually your repo name.
-  trailingSlash: false,
+  trailingSlash: true,
   themeConfig: {
     algolia: {
       appId: "WPKS0ARPZ0",
