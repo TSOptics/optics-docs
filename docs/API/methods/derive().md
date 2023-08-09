@@ -91,7 +91,10 @@ const onLastName = onPerson.derive(
 );
 ```
 
-:::info Laws of optics
+:::info
+
+### Lawful optics
+
 For your new optic to make sense the following laws must be respected.
 
 Where `a` is the original value and `b` is the derived one:
