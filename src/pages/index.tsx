@@ -31,8 +31,8 @@ const features = [
         <b>explicit its dependencies</b> to external state.
         <br />
         <br />
-        The component describes <b>what</b> it needs from the global state, not{" "}
-        <b>how</b> or from <b>where</b> it gets it.
+        The component describes <b>what</b> it needs from the global state, it
+        doesn't care about the how or the where.
         <br />
         <br />
         Components <b>decoupled</b> from external state stay <b>composable</b>{" "}
