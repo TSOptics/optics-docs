@@ -20,16 +20,16 @@ You either pass it a value to replace the previous one, or an **updater function
 import { createState } from "@optics/react";
 // ---cut---
 
-const onStates = createState([
+const statesOptic = createState([
   { name: "Virginia", capital: "Richmond", inhabitants: 8_535_519 },
   { name: "Illinois", capital: "Chicago", inhabitants: 12_812_508 },
 ]);
 
-onStates[1].capital.set("Springfield");
+statesOptic[1].capital.set("Springfield");
 
-onStates[0].name.set((prev) => prev.toUpperCase());
+statesOptic[0].name.set((prev) => prev.toUpperCase());
 
-onStates.get();
+statesOptic.get();
 // [
 //   { name: 'VIRGINIA', capital: 'Richmond', inhabitants: 8_535_519 },
 //   { name: 'Illinois', capital: 'Springfield', inhabitants: 12_812_508 }

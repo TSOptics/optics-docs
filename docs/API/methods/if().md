@@ -19,15 +19,15 @@ This method takes a predicate and return a new partial optic focused either on t
 import { createState } from "@optics/react";
 // ---cut---
 
-const onNumber = createState(42);
+const numberOptic = createState(42);
 
-const onEvenNumber = onNumber.if((n) => n % 2 === 0);
+const evenNumberOptic = numberOptic.if((n) => n % 2 === 0);
 //    ^?
 
-onEvenNumber.get(); // 42
+evenNumberOptic.get(); // 42
 
-onEvenNumber.set((prev) => prev + 1);
+evenNumberOptic.set((prev) => prev + 1);
 
-onEvenNumber.get(); // undefined
-onNumber.get(); // 43
+evenNumberOptic.get(); // undefined
+numberOptic.get(); // 43
 ```

@@ -22,7 +22,7 @@ The comparison function works the same way as in [Array.sort](https://developer.
 import { createState } from "@optics/react";
 // ---cut---
 
-const onLänder = createState([
+const länderOptic = createState([
   "Hamburg",
   "Bayern",
   "Sachsen",
@@ -30,10 +30,10 @@ const onLänder = createState([
   "Saarland",
 ]);
 
-const onSortedLänder = onLänder.map().reduceSort();
+const sortedLänderOptic = länderOptic.map().reduceSort();
 //    ^?
 
-onSortedLänder.get(); // ['Bayern', 'Brandenburg', 'Hamburg', 'Saarland', 'Sachsen']
+sortedLänderOptic.get(); // ['Bayern', 'Brandenburg', 'Hamburg', 'Saarland', 'Sachsen']
 ```
 
 - Custom comparison function:
@@ -42,10 +42,10 @@ onSortedLänder.get(); // ['Bayern', 'Brandenburg', 'Hamburg', 'Saarland', 'Sach
 import { createState } from "@optics/react";
 // ---cut---
 
-const onNumbers = createState([90, 76, 456, 2, 39, -15, 1, -65]);
+const numbersOptic = createState([90, 76, 456, 2, 39, -15, 1, -65]);
 
-const onSortedNumbers = onNumbers.map().reduceSort((a, b) => a - b);
+const sortedNumbersOptic = numbersOptic.map().reduceSort((a, b) => a - b);
 //    ^?
 
-onSortedNumbers.get(); // [-65, -15, 1, 2, 39, 76, 90, 456]
+sortedNumbersOptic.get(); // [-65, -15, 1, 2, 39, 76, 90, 456]
 ```

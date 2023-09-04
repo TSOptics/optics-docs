@@ -20,7 +20,7 @@ If `start` isn't specified the slice will begin at index 0, if `end` isn't speci
 import { createState } from "@optics/react";
 // ---cut---
 
-const onAegeanIslands = createState([
+const aegeanIslandsOptic = createState([
   "Crete",
   "Lesbos",
   "Mykonos",
@@ -29,8 +29,8 @@ const onAegeanIslands = createState([
   "Kalokairi",
 ]);
 
-const onRealAgeanIslands = onAegeanIslands.slice(0, 5);
+const realAegeanIslandsOptic = aegeanIslandsOptic.slice(0, 5);
 //    ^?
 
-onRealAgeanIslands.get(); // ['Crete', 'Lesbos', 'Mykonos', 'Santorini', 'Rhodos']
+realAegeanIslandsOptic.get(); // ['Crete', 'Lesbos', 'Mykonos', 'Santorini', 'Rhodos']
 ```

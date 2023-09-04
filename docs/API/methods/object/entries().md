@@ -19,24 +19,24 @@ It is useful to map over a record, allowing you to change both keys and values.
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-const onOlympicCities = createState<Record<string, number>>({
+const olympicCitiesOptic = createState<Record<string, number>>({
   paris: 2,
   london: 3,
   losAngeles: 2,
   tokyo: 2,
 });
 
-const onEntries = onOlympicCities.entries();
+const entriesOptic = olympicCitiesOptic.entries();
 //    ^?
 
-onEntries.get(); // [["paris", 2], ["london", 3], ["losAngeles", 2], ["tokyo", 2]];
+entriesOptic.get(); // [["paris", 2], ["london", 3], ["losAngeles", 2], ["tokyo", 2]];
 
-onEntries
+entriesOptic
   .map()
   .set(([city, olympiads]) => [
     city.toUpperCase(),
     ["paris", "losAngeles"].includes(city) ? olympiads + 1 : olympiads,
   ]);
 
-onOlympicCities.get(); // { PARIS: 3, LONDON: 3, LOSANGELES: 3, TOKYO: 2 };
+olympicCitiesOptic.get(); // { PARIS: 3, LONDON: 3, LOSANGELES: 3, TOKYO: 2 };
 ```

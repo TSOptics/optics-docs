@@ -13,9 +13,9 @@ An optic can either be `total` which means it's focused on **one value**, or `pa
 import { createState } from "@optics/react";
 // ---cut---
 
-const onUser = createState({ name: "Vincent" });
+const userOptic = createState({ name: "Vincent" });
 //    ^?
-const name = onUser.name.get();
+const name = userOptic.name.get();
 //    ^?
 ```
 
@@ -36,7 +36,7 @@ const initialUsers: { name: string; contact?: { phone: string } }[] = [
   { name: "Vincent", contact: { phone: "999-999-999" } },
   { name: "Gabin" },
 ];
-const onUsers = createState(initialUsers);
+const userOptics = createState(initialUsers);
 ```
 
 ```ts twoslash
@@ -48,7 +48,7 @@ const initialUsers: { name: string; contact?: { phone: string } }[] = [
   { name: "Gabin" },
 ];
 
-const onUsers = createState(initialUsers);
+const userOptics = createState(initialUsers);
 ```
 
 Here some users might not have any contact information, so the `contact` field is optional (hence the question mark).  
@@ -60,10 +60,10 @@ In our case it means every optics we derive from `contact` ends up partial:
 // @include: main
 // ---cut---
 
-const onFirstUserPhone = onUsers[0].contact.phone;
+const firstUserPhoneOptic = userOptics[0].contact.phone;
 //    ^?
 
-const onSecondUserPhone = onUsers[1].contact.phone;
+const secondUserPhoneOptic = userOptics[1].contact.phone;
 //    ^?
 ```
 
@@ -73,14 +73,14 @@ A partial optic returns `undefined` if one of the value in the path is not prese
 
 ```ts twoslash
 // @include: main
-const onFirstUserPhone = onUsers[0].contact.phone;
-const onSecondUserPhone = onUsers[1].contact.phone;
+const firstUserPhoneOptic = userOptics[0].contact.phone;
+const secondUserPhoneOptic = userOptics[1].contact.phone;
 // ---cut---
 
-const vincentsPhone = onFirstUserPhone.get();
+const vincentsPhone = firstUserPhoneOptic.get();
 //    ^?
 
-const gabinsPhone = onSecondUserPhone.get();
+const gabinsPhone = secondUserPhoneOptic.get();
 //    ^?
 
 // vincentsPhone = "999-999-999"
@@ -91,12 +91,12 @@ When trying to update a value that a partial fails to reach then it simply no-op
 
 ```ts twoslash
 // @include: main
-const onFirstUserPhone = onUsers[0].contact.phone;
-const onSecondUserPhone = onUsers[1].contact.phone;
+const firstUserPhoneOptic = userOptics[0].contact.phone;
+const secondUserPhoneOptic = userOptics[1].contact.phone;
 // ---cut---
-onSecondUserPhone.set("888-888-888");
+secondUserPhoneOptic.set("888-888-888");
 
-onSecondUserPhone.get(); // undefined
+secondUserPhoneOptic.get(); // undefined
 ```
 
 :::tip
@@ -109,8 +109,8 @@ then using the same path on the optic will get you a partial optic (no need to u
 initialUsers[0].contact?.phone;
 //                       ^?
 
-onUsers[0].contact.phone;
-//                 ^?
+userOptics[0].contact.phone;
+//                    ^?
 ```
 
 :::
@@ -122,17 +122,17 @@ Or again the [`if`](<../API/methods/if()>) method returns a partial optic becaus
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-const onNumber = createState(42);
+const numberOptic = createState(42);
 
-const onEvenNumber = onNumber.if((n) => n % 2 === 0);
+const evenNumberOptic = numberOptic.if((n) => n % 2 === 0);
 //    ^?
 
-onEvenNumber.get(); // 42
+evenNumberOptic.get(); // 42
 
-onEvenNumber.set((n) => n + 1);
+evenNumberOptic.set((n) => n + 1);
 
-onNumber.get(); // 43
-onEvenNumber.get(); // undefined
+numberOptic.get(); // 43
+evenNumberOptic.get(); // undefined
 ```
 
 ### Type relations
@@ -143,9 +143,9 @@ onEvenNumber.get(); // undefined
 import { createState, Optic, partial } from "@optics/react";
 // ---cut---
 
-const onNumber = createState(42);
+const numberOptic = createState(42);
 
-const onNumberPartial: Optic<number, partial> = onNumber; // ✅ allowed
+const numberPartialOptic: Optic<number, partial> = numberOptic; // ✅ allowed
 ```
 
 However the reverse is not true, assigning a partial optic to a total one (narrowing the type) fails to compile:
@@ -155,8 +155,8 @@ However the reverse is not true, assigning a partial optic to a total one (narro
 import { createState, Optic, total } from "@optics/react";
 // ---cut---
 
-const onEvenNumber = createState(42).if((n) => n % 2 === 0);
+const evenNumberOptic = createState(42).if((n) => n % 2 === 0);
 //    ^?
 
-const onNumberTotal: Optic<number, total> = onEvenNumber;
+const numberTotalOptic: Optic<number, total> = evenNumberOptic;
 ```

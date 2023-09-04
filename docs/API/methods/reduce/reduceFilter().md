@@ -17,16 +17,16 @@ Analogous to [Array.filter](https://developer.mozilla.org/docs/Web/JavaScript/Re
 import { createState } from "@optics/react";
 // ---cut---
 
-const onCountries = createState([
+const countriesOptic = createState([
   { name: "Spain", continent: "Europe" },
   { name: "Sénégal", continent: "Africa" },
   { name: "Columbia", continent: "South America" },
   { name: "Gabon", continent: "Africa" },
 ]);
 
-const onAfricanCountries = onCountries
+const africanCountriesOptic = countriesOptic
   .map()
   .reduceFilter((country) => country.continent === "Africa");
 
-onAfricanCountries.name.get(); // ['Sénégal', 'Gabon']
+africanCountriesOptic.name.get(); // ['Sénégal', 'Gabon']
 ```

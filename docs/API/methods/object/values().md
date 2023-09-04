@@ -19,18 +19,18 @@ Analogous to [Object.values](https://developer.mozilla.org/docs/Web/JavaScript/R
 import { createState } from "@optics/react";
 // ---cut---
 
-const onCapitals = createState<Record<string, string>>({
+const capitalsOptic = createState<Record<string, string>>({
   France: "paris",
   Italy: "roma",
   Australia: "canberra",
 });
 
-const onValues = onCapitals.values();
+const valuesOptic = capitalsOptic.values();
 //    ^?
 
-onValues.get(); // ['paris', 'roma', 'canberra'];
+valuesOptic.get(); // ['paris', 'roma', 'canberra'];
 
-onValues.map().set((prev) => prev[0].toUpperCase() + prev.slice(1));
+valuesOptic.map().set((prev) => prev[0].toUpperCase() + prev.slice(1));
 
-onCapitals.get(); // { France: "Paris", Italy: "Roma", Australia: "Canberra" }
+capitalsOptic.get(); // { France: "Paris", Italy: "Roma", Australia: "Canberra" }
 ```

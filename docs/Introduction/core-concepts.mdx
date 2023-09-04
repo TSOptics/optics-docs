@@ -23,7 +23,7 @@ We already saw that we can decompose, or break down, an optic into smaller parts
 ```twoslash include main
 import { createState } from "@optics/react";
 
-const onUsers = createState([
+const usersOptic = createState([
   {
     name: "John",
     age: 42,
@@ -36,7 +36,7 @@ const onUsers = createState([
 // @include: main
 // ---cut---
 
-const onJeanneAge = onUsers[1].age;
+const jeanneAgeOptic = usersOptic[1].age;
 //    ^?
 ```
 
@@ -54,7 +54,7 @@ When deriving an optic in a component body it's better to wrap with in `useMemo`
 import { useMemo } from "react";
 // ---cut---
 
-const onJeanneAge = useMemo(() => onUsers[1].age, [onUsers]);
+const jeanneAgeOptic = useMemo(() => usersOptic[1].age, [usersOptic]);
 ```
 
 :::
@@ -63,21 +63,23 @@ It also greatly simplifies immutable updates:
 instead of having to shallow copy every level up to the one that interests us (the dreaded _spread operator pyramid of doom_)
 we just have to **focus on the specific part** we want to update and call `set` on it.
 
-Once we update the underlying value, the subscribers (usually components) will be notified, whether they subscribed to the `onJeanneAge` optic or any other optic whose value would have changed due to the update.
+Once we update the underlying value, the subscribers (usually components) will be notified, whether they subscribed to the `jeanneAgeOptic` optic or any other optic whose value would have changed due to the update.
 
 ```ts twoslash
 // @include: main
-const onJeanneAge = onUsers[1].age;
+const jeanneAgeOptic = usersOptic[1].age;
 // ---cut---
 
-onUsers.subscribe(() => console.log("users informations were updated")); // ✅
-onUsers[0].subscribe(() => console.log("John's informations were updated")); // ❌
-onUsers[1].subscribe(() => console.log("Jeanne's informations were updated")); // ✅
-onJeanneAge.subscribe((age) =>
+usersOptic.subscribe(() => console.log("users informations were updated")); // ✅
+usersOptic[0].subscribe(() => console.log("John's informations were updated")); // ❌
+usersOptic[1].subscribe(() =>
+  console.log("Jeanne's informations were updated")
+); // ✅
+jeanneAgeOptic.subscribe((age) =>
   console.log(`Jeanne's age was updated to ${age}`)
 ); // ✅
 
-onJeanneAge.set(33);
+jeanneAgeOptic.set(33);
 ```
 
 Console output:
@@ -95,7 +97,7 @@ Don't use destructuring to derive new optics.
 They use proxies under the hood to return new optics from properties so the following won't work:
 
 ```ts
-const { age, name } = onJeanne;
+const { age, name } = jeanneOptic;
 ```
 
 :::
@@ -109,19 +111,19 @@ For example if we want to focus on the oldest user:
 
 ```ts twoslash
 // @include: main
-const onJeanneAge = onUsers[1].age;
+const jeanneAgeOptic = usersOptic[1].age;
 // ---cut---
 
-const onOldestUser = onUsers.max((user) => user.age);
+const oldestUserOptic = usersOptic.max((user) => user.age);
 
-onOldestUser.get(); // { name: "John", age: 42, address: { ... } }
+oldestUserOptic.get(); // { name: "John", age: 42, address: { ... } }
 
-onJeanneAge.set(80);
+jeanneAgeOptic.set(80);
 
-onOldestUser.get(); // { name: "Jeanne", age: 80, address: { ... } }
+oldestUserOptic.get(); // { name: "Jeanne", age: 80, address: { ... } }
 ```
 
-Here `onOldestUser` will always point to the oldest user, so when we age poor Jeanne by 47 years, she becomes the oldest user and the optic points to her now.
+Here `oldestUserOptic` will always point to the oldest user, so when we age poor Jeanne by 47 years, she becomes the oldest user and the optic points to her now.
 
 The [`max`](<../API/Methods/array/max()>), [`min`](<../API/Methods/array/min()>) or [`findFirst`](<../API/Methods/array/findFirst()>) methods are available when the focused type is an array, the [`entries`](<../API/Methods/object/entries()>) and [`values`](<../API/Methods/object/values()>) methods when it's a record,
 and some methods are available for all optics like [`if`](<../API/Methods/if()>) or [`refine`](<../API/Methods/refine()>).
@@ -131,10 +133,10 @@ It takes two parameters, a `get` function to derive a new value from the origina
 
 ```ts twoslash
 // @include: main
-const onJeanne = onUsers[1];
+const jeanneOptic = usersOptic[1];
 // ---cut---
 
-const onJeanneStreetTuple = onJeanne.address.street.derive(
+const jeanneStreetTupleOptic = jeanneOptic.address.street.derive(
   ({ name, number }) => [name, number] as const,
   ([name, number]) => ({ name, number })
 );
@@ -145,31 +147,32 @@ Now we can manipulate the street as a tuple even though it is still represented 
 
 ```ts twoslash
 // @include: main
-const onJeanne = onUsers[1];
-const onJeanneStreetTuple = onJeanne.address.street.derive(
+const jeanneOptic = usersOptic[1];
+const jeanneStreetTupleOptic = jeanneOptic.address.street.derive(
   ({ name, number }) => [name, number] as const,
   ([name, number]) => ({ name, number })
 );
 
 // ---cut---
 
-onJeanneStreetTuple.set(([name, number]) => [name, number + 10]);
+jeanneStreetTupleOptic.set(([name, number]) => [name, number + 10]);
 
-onJeanneStreetTuple.get(); // ["Rue de Rivoli", 11]
+jeanneStreetTupleOptic.get(); // ["Rue de Rivoli", 11]
 
-onJeanne.address.street.get(); // { name: "Rue de Rivoli", number: 11 }
+jeanneOptic.address.street.get(); // { name: "Rue de Rivoli", number: 11 }
 ```
 
 If we don't pass a `set` function then we get a `ReadOptic`, an optic that can't be updated and acts effectively as a composable selector:
 
 ```ts twoslash
 // @include: main
-const onJeanne = onUsers[1];
+const jeanneOptic = usersOptic[1];
 // ---cut---
-const onStreet = onJeanne.address.street;
+const streetOptic = jeanneOptic.address.street;
 
-const onTuple = onStreet.derive(({ name, number }) => [name, number] as const);
-//    ^?
+const tupleOptic = streetOptic.derive(
+  ({ name, number }) => [name, number] as const
+);
 ```
 
 ## Compose
@@ -182,34 +185,34 @@ To illustrate let's create a new organization with a name, and a list of employe
 ```twoslash include Interpol
 import { createState, Optic } from "@optics/react";
 
-let onUsers: Optic<
+let usersOptic: Optic<
   {
     name: string;
     age: number;
     address: { city: string; street: { name: string; number: number } };
   }[]
 > = {} as any;
-const onJohn = onUsers[0];
-const onJeanne = onUsers[1];
+const johnOptic = usersOptic[0];
+const jeanneOptic = usersOptic[1];
 
-const onInterpol = createState({
+const interpolOptic = createState({
   name: "Interpol",
   established: "1923",
-  employees: [onJeanne, onJohn],
+  employees: [jeanneOptic, johnOptic],
 });
 ```
 
 ```ts twoslash
 // @include: main
-const onJohn = onUsers[0];
-const onJeanne = onUsers[1];
+const johnOptic = usersOptic[0];
+const jeanneOptic = usersOptic[1];
 
 // ---cut---
 
-const onInterpol = createState({
+const interpolOptic = createState({
   name: "Interpol",
   established: "1923",
-  employees: [onJeanne, onJohn],
+  employees: [jeanneOptic, johnOptic],
 });
 ```
 
@@ -220,7 +223,7 @@ When we call `get` on interpol's optic it automatically **denormalizes** the res
 ```ts twoslash
 // @include: Interpol
 // ---cut---
-const interpol = onInterpol.get();
+const interpol = interpolOptic.get();
 // {
 //   name: "Interpol",
 //   established: "1923",
@@ -240,13 +243,13 @@ To illustrate let's give back Jeanne her youth:
 
 ```ts twoslash
 // @include: Interpol
-const onJeanneAge = onJeanne.age;
+const jeanneAgeOptic = jeanneOptic.age;
 // ---cut---
-onInterpol.employees.subscribe((employees) =>
+interpolOptic.employees.subscribe((employees) =>
   console.log(`one of the ${employees.length} employees was updated`)
 );
 
-onJeanneAge.set(32);
+jeanneAgeOptic.set(32);
 ```
 
 Console output:
@@ -267,7 +270,7 @@ In SQL we use **joins** to get the final denormalized result, with optics it is 
 ```ts twoslash
 // @include: Interpol
 // ---cut---
-const result = onInterpol.get({ denormalize: false });
+const result = interpolOptic.get({ denormalize: false });
 ```
 
 The type of the returned value will of course change depending on the value of `denormalize`:
@@ -288,11 +291,11 @@ denormalize: true (default)
 
 ```ts twoslash
 // @include: Interpol
-const result = onInterpol.get({ denormalize: false });
+const result = interpolOptic.get({ denormalize: false });
 // ---cut---
 
 result;
-//    ^?
+// ^?
 ```
 
 </td>
@@ -300,7 +303,7 @@ result;
 
 ```ts twoslash
 // @include: Interpol
-const denormalizedResult = onInterpol.get();
+const denormalizedResult = interpolOptic.get();
 
 // ---cut---
 
@@ -321,9 +324,9 @@ First let's make cities a first-class citizen in our state:
 ```twoslash include cities
 import { createState } from "@optics/react";
 
-const onParis = createState({ name: "Paris", inhabitants: 2_200_000 });
-const onMilan = createState({ name: "Milan", inhabitants: 1_400_000 });
-const onNewYork = createState({ name: "New York", inhabitants: 8_500_000 });
+const parisOptic = createState({ name: "Paris", inhabitants: 2_200_000 });
+const milanOptic = createState({ name: "Milan", inhabitants: 1_400_000 });
+const newYorkOptic = createState({ name: "New York", inhabitants: 8_500_000 });
 ```
 
 ```ts twoslash
@@ -336,39 +339,39 @@ Then we can rework our initial state. Instead of representing a user's city with
 // @include: cities
 // ---cut---
 
-const onUsers = createState([
+const usersOptic = createState([
   {
     name: "John",
     age: 42,
-    address: { city: onNewYork },
+    address: { city: newYorkOptic },
   },
   {
     name: "Jeanne",
     age: 32,
-    address: { city: onParis },
+    address: { city: parisOptic },
   },
 ]);
 ```
 
-Now the fully denormalized result from `onInterpol` looks like that:
+Now the fully denormalized result from `interpolOptic` looks like that:
 
 ```ts twoslash
 // @include: cities
 import { Optic } from "@optics/react";
-const onJohn = createState({
+const johnOptic = createState({
   name: "John",
   age: 42,
-  address: { city: onNewYork },
+  address: { city: newYorkOptic },
 });
-const onInterpol = createState({
+const interpolOptic = createState({
   name: "Interpol",
   established: "1923",
-  employees: [onJohn],
+  employees: [johnOptic],
 });
 
 // ---cut---
 
-const interpol = onInterpol.get();
+const interpol = interpolOptic.get();
 
 // {
 //   name: "Interpol",
@@ -405,17 +408,17 @@ For example if Jeanne moves to Milan:
 
 ```ts twoslash
 // @include: cities
-const onUsers = createState([
+const usersOptic = createState([
   {
     name: "John",
     age: 42,
-    address: { city: onNewYork },
+    address: { city: newYorkOptic },
   },
 ]);
 
 // ---cut---
 
-onUsers[1].address.city.set(onMilan);
+usersOptic[1].address.city.set(milanOptic);
 ```
 
 Referencing other entities with optics allows us to represent our state as a **graph**,
@@ -470,24 +473,24 @@ That's where optics come in, as they allow us to naturally decouple our componen
 ```tsx twoslash
 import { Optic, useOptic } from "@optics/react";
 // @include: cities
-type User = { name: string; age: number; address: { city: typeof onParis } };
+type User = { name: string; age: number; address: { city: typeof parisOptic } };
 
 // ---cut---
 
 interface UserProps {
-  onUser: Optic<User>;
+  userOptic: Optic<User>;
 }
 
-const User = ({ onUser }: UserProps) => {
-  const [user, setUser] = useOptic(onUser);
+const User = ({ userOptic }: UserProps) => {
+  const [user, setUser] = useOptic(userOptic);
 };
 ```
 
 Now the User component can be passed **any optic** focused on a user, allowing you to **reuse it** anywhere in your application.
 
 ```tsx
-<User onUser={onJeanne} />
-<User onUser={onJohn} />
+<User userOptic={jeanneOptic} />
+<User userOptic={johnOptic} />
 ```
 
 When testing you can create a new throwaway user just for your test needs, without having to worry about the rest of the global state:
@@ -496,9 +499,9 @@ When testing you can create a new throwaway user just for your test needs, witho
 import { render } from "@testing-library/*";
 
 test("User renders a user", () => {
-  const onTestUser = createState({ name: "Vincent", age: 29, address: { ... } });
+  const testUserOptic = createState({ name: "Vincent", age: 29, address: { ... } });
 
-  render(<User onUser={onTestUser} />);
+  render(<User userOptic={testUserOptic} />);
 });
 ```
 
@@ -507,7 +510,7 @@ Listing dependencies in the props is always recommended to avoid coupling and th
 #### Roots and leaves
 
 Of course not all components can get their optics through their props as we have to start somewhere with some initial optics.
-For example the `UserList` component is **close to the root** and imports the `onUsers` optic directly:
+For example the `UserList` component is **close to the root** and imports the `usersOptic` optic directly:
 
 ```tsx twoslash
 // @module: esnext
@@ -524,25 +527,25 @@ export type User = {
   };
 };
 
-export const onUsers = {} as Optic<User[]>;
+export const usersOptic = {} as Optic<User[]>;
 
 // @filename: UserList.tsx
 // @module: esnext
 import { User } from "./users";
 import React, { FC } from "react";
 import { Optic, useOptic } from "@optics/react";
-const User = {} as FC<{ onUser: Optic<User> }>;
+const User = {} as FC<{ userOptic: Optic<User> }>;
 // ---cut---
-import { onUsers } from "./users";
+import { usersOptic } from "./users";
 
 const UserList = () => {
-  const [users, setUsers] = useOptic(onUsers);
+  const [users, setUsers] = useOptic(usersOptic);
 
   return (
     <ul>
       {users.map((user, index) => (
         <li key={user.name}>
-          <User onUser={onUsers[index]} />
+          <User userOptic={usersOptic[index]} />
         </li>
       ))}
     </ul>
@@ -550,7 +553,7 @@ const UserList = () => {
 };
 ```
 
-But now that we have this optic the component can derive new optics for each user and pass them down to the `User` component, which if you remember takes one through a `onUser` prop.  
+But now that we have this optic the component can derive new optics for each user and pass them down to the `User` component, which if you remember takes one through a `userOptic` prop.  
 In turn the `User` component itself derives from its optic a new one focused on the user's street and pass it down to a `StreetForm` component, etc ...
 
 That way once a root component has imported an optic, **most components below it** can get their optics through their props and **stay decoupled from the global state**, letting you reuse them elsewhere, test them, render them in stories, etc.

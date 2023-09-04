@@ -29,11 +29,11 @@ type Person = {
   };
 };
 
-declare const onState: Optic<{ buyer: Person; seller: Person }>;
+declare const stateOptic: Optic<{ buyer: Person; seller: Person }>;
 
-const onBuyer = onState.buyer;
+const buyerOptic = stateOptic.buyer;
 //    ^?
-const onSeller = onState.seller;
+const sellerOptic = stateOptic.seller;
 //    ^?
 ```
 
@@ -51,15 +51,15 @@ type Person = {
     };
   };
 };
-declare const onBuyer: Optic<Person>;
-declare const onSeller: Optic<Person>;
+declare const buyerOptic: Optic<Person>;
+declare const sellerOptic: Optic<Person>;
 
 // ---cut---
-const onLine1 = pureOptic<Person>().contact.address.line1;
+const line1Optic = pureOptic<Person>().contact.address.line1;
 //    ^?
 
-const onBuyerLine1 = onBuyer.compose(onLine1);
+const buyerLine1Optic = buyerOptic.compose(line1Optic);
 //    ^?
-const onSellerLine1 = onSeller.compose(onLine1);
+const sellerLine1Optic = sellerOptic.compose(line1Optic);
 //    ^?
 ```

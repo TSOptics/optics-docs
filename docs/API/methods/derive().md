@@ -30,37 +30,37 @@ The `get` function is memoized for you, it will only run when the original value
 import { createState } from "@optics/react";
 // ---cut---
 
-const onMilliseconds = createState(15_000);
+const millisecondsOptic = createState(15_000);
 
-const onSeconds = onMilliseconds.derive(
+const secondsOptic = millisecondsOptic.derive(
   (ms) => ms / 1000,
   (seconds) => seconds * 1000
 );
 ```
 
-Here our `onSeconds` optic allows us to read and manipulate our time measurement in seconds even though it is represented in milliseconds in our state.
+Here our `secondsOptic` optic allows us to read and manipulate our time measurement in seconds even though it is represented in milliseconds in our state.
 
 ```ts twoslash
 import { Optic } from "@optics/react";
-declare const onMilliseconds: Optic<number>;
-declare const onSeconds: Optic<number>;
+declare const millisecondsOptic: Optic<number>;
+declare const secondsOptic: Optic<number>;
 // ---cut---
 
-onSeconds.get(); // 15
+secondsOptic.get(); // 15
 
 // make it on minute
-onSeconds.set(60);
+secondsOptic.set(60);
 
-onMilliseconds.get(); // 60_000
+millisecondsOptic.get(); // 60_000
 ```
 
 If you don't pass a `set` function you get a `ReadOptic`, an optic that can't be updated:
 
 ```ts twoslash
 import { createState } from "@optics/react";
-const onMilliseconds = createState(15_000);
+const millisecondsOptic = createState(15_000);
 // ---cut---
-const onSeconds = onMilliseconds.derive((ms) => ms / 1000);
+const secondsOptic = millisecondsOptic.derive((ms) => ms / 1000);
 //    ^?
 ```
 
@@ -69,9 +69,9 @@ const onSeconds = onMilliseconds.derive((ms) => ms / 1000);
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-const onObject = createState({ firstName: "Aaron", lastName: "Schwartz" });
+const objectOptic = createState({ firstName: "Aaron", lastName: "Schwartz" });
 
-const onTuple = onObject.derive(
+const tupleOptic = objectOptic.derive(
   ({ firstName, lastName }) => [firstName, lastName] as const,
   ([firstName, lastName]) => ({ firstName, lastName })
 );
@@ -83,9 +83,9 @@ const onTuple = onObject.derive(
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-const onPerson = createState({ firstName: "Aaron", lastName: "Schwartz" });
+const personOptic = createState({ firstName: "Aaron", lastName: "Schwartz" });
 
-const onLastName = onPerson.derive(
+const lastNameOptic = personOptic.derive(
   (person) => person.lastName,
   (lastName, person) => ({ ...person, lastName })
 );

@@ -5,7 +5,7 @@ sidebar_position: 2
 
 ```twoslash include main
 import { createState, Optic } from "@optics/react";
-const onState = {} as Optic<{name: string;visitors: number;attractions: string[]}[]>
+const stateOptic = {} as Optic<{name: string;visitors: number;attractions: string[]}[]>
 ```
 
 ## Map
@@ -18,7 +18,7 @@ To illustrate that let's create a new state holding US national parks:
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-const onState = createState([
+const stateOptic = createState([
   {
     name: "Zion",
     visitors: 5_039_835,
@@ -43,7 +43,7 @@ The initial state is an array so we can call `.map()` to get a mapped optic, an 
 // @include: main
 // ---cut---
 
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 //    ^?
 ```
 
@@ -51,41 +51,41 @@ From there we can get the name of every national park ...
 
 ```ts twoslash
 // @include: main
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 // ---cut---
 
-const onNames = onNationalParks.name;
+const namesOptic = nationalParksOptic.name;
 //    ^?
 
-onNames.get(); // ['Zion', 'Yosemite', 'Yellowstone']
+namesOptic.get(); // ['Zion', 'Yosemite', 'Yellowstone']
 ```
 
 ... or update them all at once:
 
 ```ts twoslash
 // @include: main
-const onNames = onState.map().name;
+const namesOptic = stateOptic.map().name;
 // ---cut---
 
-onNames.set((prev) => `${prev} National Park`);
+namesOptic.set((prev) => `${prev} National Park`);
 
-onNames.get(); // ['Zion National Park', 'Yosemite National Park', 'Yellowstone National Park']
+namesOptic.get(); // ['Zion National Park', 'Yosemite National Park', 'Yellowstone National Park']
 ```
 
 Same thing but for the annual number of visitors:
 
 ```ts twoslash
 // @include: main
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 // ---cut---
 
-const onVisitors = onNationalParks.visitors;
+const visitorsOptic = nationalParksOptic.visitors;
 //    ^?
 
-onVisitors.get(); // [5_039_835, 3_287_595, 4_860_242]
+visitorsOptic.get(); // [5_039_835, 3_287_595, 4_860_242]
 
-onVisitors.set((prev) => prev + 1_000_000);
-onVisitors.get(); // [6_039_835, 4_287_595, 5_860_242]
+visitorsOptic.set((prev) => prev + 1_000_000);
+visitorsOptic.get(); // [6_039_835, 4_287_595, 5_860_242]
 ```
 
 The update function is applied to every focused value, which is convenient to update or reset a large number of values all at once.
@@ -100,25 +100,25 @@ You can call `.map()` every time the focused value is an array, even if the opti
 
 ```ts twoslash
 // @include: main
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 // ---cut---
 
-const onAttractions = onNationalParks.attractions.map();
+const attractionsOptic = nationalParksOptic.attractions.map();
 //    ^?
 ```
 
-Here `onAttractions` is a mapped optic focused on every attraction from every national park.
+Here `attractionsOptic` is a mapped optic focused on every attraction from every national park.
 
 ```ts twoslash
 // @include: main
-const onAttractions = onState.map().attractions.map();
+const attractionsOptic = stateOptic.map().attractions.map();
 declare const capitalize: (s: string) => string;
 // ---cut---
 
-onAttractions.get(); // ['angels landing', 'great white throne', 'half dome', 'el capitan', 'mariposa grove', 'old faithful', 'grand prismatic']
+attractionsOptic.get(); // ['angels landing', 'great white throne', 'half dome', 'el capitan', 'mariposa grove', 'old faithful', 'grand prismatic']
 
-onAttractions.set(capitalize);
-onAttractions.get(); // ['Angels Landing', 'Great White Throne', 'Half Dome', 'El Capitan', 'Mariposa Grove', 'Old Faithful', 'Grand Prismatic']
+attractionsOptic.set(capitalize);
+attractionsOptic.get(); // ['Angels Landing', 'Great White Throne', 'Half Dome', 'El Capitan', 'Mariposa Grove', 'Old Faithful', 'Grand Prismatic']
 ```
 
 Calling `.get()` returns a flat representation of all attractions, even though in the root state they are nested in their respective national parks.
@@ -127,7 +127,7 @@ Updating them with `.set()` preserves the state's original structure.
 We can see that if we look at our state, now that we've applied all these transformations thanks to mapped optics:
 
 ```ts
-// onNationalParks.get();
+// nationalParksOptic.get();
 [
   {
     name: "Zion National Park",
@@ -164,29 +164,29 @@ For example to focus on all attractions sorted by name...:
 
 ```ts twoslash
 // @include: main
-const onAttractions = onState.map().attractions.map();
+const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
-const onSortedAttractions = onAttractions.reduceSort((a, b) =>
+const sortedAttractionsOptic = attractionsOptic.reduceSort((a, b) =>
   a.localeCompare(b)
 );
 
-onSortedAttractions.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic', 'Great White Throne', 'Half Dome', 'Mariposa Grove', 'Old Faithful']
+sortedAttractionsOptic.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic', 'Great White Throne', 'Half Dome', 'Mariposa Grove', 'Old Faithful']
 ```
 
 ... and then to focus on the first three:
 
 ```ts twoslash
 // @include: main
-const onAttractions = onState.map().attractions.map();
-declare const onSortedAttractions: typeof onAttractions;
+const attractionsOptic = stateOptic.map().attractions.map();
+declare const sortedAttractionsOptic: typeof attractionsOptic;
 // ---cut---
 
-const onFirstThreeSorted = onSortedAttractions.reduceSlice(0, 3);
+const firstThreeSortedOptic = sortedAttractionsOptic.reduceSlice(0, 3);
 
-onFirstThreeSorted.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic']
-onFirstThreeSorted.set((prev) => prev.toUpperCase());
+firstThreeSortedOptic.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic']
+firstThreeSortedOptic.set((prev) => prev.toUpperCase());
 
-onAttractions.get(); // ['ANGELS LANDING', 'Great White Throne', 'Half Dome', 'EL CAPITAN', 'Old Faithful', 'Mariposa Grove', 'GRAND PRISMATIC']
+attractionsOptic.get(); // ['ANGELS LANDING', 'Great White Throne', 'Half Dome', 'EL CAPITAN', 'Old Faithful', 'Mariposa Grove', 'GRAND PRISMATIC']
 ```
 
 ### Back to one (or none)
@@ -197,14 +197,14 @@ For example to focus on the first attraction starting with the letter G:
 
 ```ts twoslash
 // @include: main
-const onAttractions = onState.map().attractions.map();
+const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
 
-const onFirstStartingWithG = onAttractions.reduceFindFirst((attraction) =>
+const firstStartingWithGOptic = attractionsOptic.reduceFindFirst((attraction) =>
   attraction.startsWith("G")
 );
 
-onFirstStartingWithG.get(); // 'Great White Throne'
+firstStartingWithGOptic.get(); // 'Great White Throne'
 // ^?
 ```
 
@@ -212,13 +212,13 @@ Or to focus on the attraction with the shortest name:
 
 ```ts twoslash
 // @include: main
-const onAttractions = onState.map().attractions.map();
+const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
 
-const onShortestName = onAttractions.reduceMin((name) => name.length);
+const shortestNameOptic = attractionsOptic.reduceMin((name) => name.length);
 
-onShortestName.get(); // 'Half Dome'
-//    ^?
+shortestNameOptic.get(); // 'Half Dome'
+// ^?
 ```
 
 :::info
@@ -238,13 +238,13 @@ It means that ...
 
 ```ts twoslash
 // @include: main
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 // ---cut---
-const onLongestForEachPark = onNationalParks.attractions.max(
+const longestForEachParkOptic = nationalParksOptic.attractions.max(
   (attraction) => attraction.length
 );
 
-onLongestForEachPark.get(); // ['Great White Throne', 'Mariposa Grove', 'Grand Prismatic']
+longestForEachParkOptic.get(); // ['Great White Throne', 'Mariposa Grove', 'Grand Prismatic']
 // ^?
 ```
 
@@ -252,14 +252,14 @@ onLongestForEachPark.get(); // ['Great White Throne', 'Mariposa Grove', 'Grand P
 
 ```ts twoslash
 // @include: main
-const onNationalParks = onState.map();
+const nationalParksOptic = stateOptic.map();
 // ---cut---
 
-const onMostAttractions = onNationalParks.attractions.reduceMax(
+const mostAttractionsOptic = nationalParksOptic.attractions.reduceMax(
   (attractions) => attractions.length
 );
 
-onMostAttractions.get(); // ['Half Dome', 'El Capitan', 'Mariposa Grove']
+mostAttractionsOptic.get(); // ['Half Dome', 'El Capitan', 'Mariposa Grove']
 // ^?
 ```
 

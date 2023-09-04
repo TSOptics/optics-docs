@@ -19,12 +19,12 @@ This method returns a new [mapped optic](../../../Guides/map_reduce) from an opt
 import { createState } from "@optics/react";
 // ---cut---
 
-const onArray = createState([1, 2, 3, 4, 5]);
+const numbersOptic = createState([1, 2, 3, 4, 5]);
 
-const onNumbers = onArray.map();
+const numbersMappedOptic = numbersOptic.map();
 //    ^?
 
-onNumbers.set((prev) => prev * 2);
+numbersMappedOptic.set((prev) => prev * 2);
 
-onNumbers.get(); // [2, 4, 6, 8, 10]
+numbersMappedOptic.get(); // [2, 4, 6, 8, 10]
 ```

@@ -21,10 +21,10 @@ The component re-renders each time the focused value changes.
 ```tsx twoslash
 import { useOptic, createState } from "@optics/react";
 
-const onCount = createState(42);
+const countOptic = createState(42);
 
 const MyCount = () => {
-  const [count, setCount] = useOptic(onCount);
+  const [count, setCount] = useOptic(countOptic);
 
   // set new count value
   setCount(100);

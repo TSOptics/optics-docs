@@ -17,14 +17,14 @@ Analogous to [Array.find](https://developer.mozilla.org/docs/Web/JavaScript/Refe
 import { createState } from "@optics/react";
 // ---cut---
 
-const onNumbers = createState([42, 16, 98, 123, 8, 245]);
+const numbersOptic = createState([42, 16, 98, 123, 8, 245]);
 
-const onGreaterThan100 = onNumbers.findFirst((n) => n > 100);
+const greaterThan100Optic = numbersOptic.findFirst((n) => n > 100);
 //    ^?
 
-onGreaterThan100.get(); // 123
+greaterThan100Optic.get(); // 123
 
-onGreaterThan100.set(99);
+greaterThan100Optic.set(99);
 
-onGreaterThan100.get(); // 245
+greaterThan100Optic.get(); // 245
 ```

@@ -7,8 +7,8 @@ title: useOpticReducer()
 
 ```tsx
 function useOpticReducer<T, TOpticType, Action>(
-  onState: Optic<T, TOpticType>,
-  reducer: (state: T, action: Action, onState: Optic<T, total, T>) => T
+  stateOptic: Optic<T, TOpticType>,
+  reducer: (state: T, action: Action, stateOptic: Optic<T, total, T>) => T
 ): [T, Dispatch<Action>];
 ```
 
@@ -43,25 +43,25 @@ const initialCounter = { value: 0, step: 1 };
 const reducer = (
   state: State,
   action: Action,
-  onState: PureOptic<State, total, State>
+  stateOptic: PureOptic<State, total, State>
 ) => {
   switch (action.type) {
     case "increment":
       // equivalent to: return { ...state, value: state.value + state.step };
-      return onState.value.set((prev) => prev + state.step, state);
+      return stateOptic.value.set((prev) => prev + state.step, state);
     case "decrement":
-      return onState.value.set((prev) => prev - state.step, state);
+      return stateOptic.value.set((prev) => prev - state.step, state);
     case "changeStep":
-      return onState.step.set(action.step, state);
+      return stateOptic.step.set(action.step, state);
     case "reset":
       return initialCounter;
   }
 };
 
-const onCounter = createState(initialCounter);
+const counterOptic = createState(initialCounter);
 
 const MyCounterComponent = () => {
-  const [counter, dispatch] = useOpticReducer(onCounter, reducer);
+  const [counter, dispatch] = useOpticReducer(counterOptic, reducer);
 
   useEffect(() => {
     dispatch({ type: "increment" });

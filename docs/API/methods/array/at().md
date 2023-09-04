@@ -18,11 +18,11 @@ Just like JavaScript's [Array.at](https://developer.mozilla.org/en-US/docs/Web/J
 import { createState } from "@optics/react";
 // ---cut---
 
-const onNumberArray = createState([78, 90, 4, 7, 10, 789, 42, 90]);
+const numbersOptic = createState([78, 90, 4, 7, 10, 789, 42, 90]);
 
-const onFifthElement = onNumberArray.at(4);
+const fifthElementOptic = numbersOptic.at(4);
 //    ^?
-onFifthElement.get(); // 10
+fifthElementOptic.get(); // 10
 
-onNumberArray.at(-2).get(); // 42
+numbersOptic.at(-2).get(); // 42
 ```

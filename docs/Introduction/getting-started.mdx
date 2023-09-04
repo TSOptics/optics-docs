@@ -41,7 +41,7 @@ To create a global state call the `createState` function and pass it an initial 
 ```twoslash include main
 import { createState } from "@optics/react";
 
-const onUsers = createState([
+const usersOptic = createState([
   {
     name: "John",
     age: 42,
@@ -62,7 +62,7 @@ Read the state with `get`:
 ```ts twoslash
 // @include: main
 // ---cut---
-onUsers.get(); // [{ name: "John", age: 42, address: { ... } }]
+usersOptic.get(); // [{ name: "John", age: 42, address: { ... } }]
 ```
 
 Update it with `set`:
@@ -71,7 +71,7 @@ Update it with `set`:
 // @include: main
 // ---cut---
 // adds a new user
-onUsers.set((prev) => [
+usersOptic.set((prev) => [
   ...prev,
   {
     name: "Jeanne",
@@ -80,7 +80,7 @@ onUsers.set((prev) => [
   },
 ]);
 
-onUsers.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jeanne", age: 32, address: { ... } }]
+usersOptic.get(); // [{ name: "John", age: 42, address: { ... } }, { name: "Jeanne", age: 32, address: { ... } }]
 ```
 
 Subscribe to it with `subscribe`:
@@ -89,7 +89,7 @@ Subscribe to it with `subscribe`:
 // @include: main
 // ---cut---
 
-onUsers.subscribe((users) => {
+usersOptic.subscribe((users) => {
   console.log("users changed: ", users);
 });
 ```
@@ -108,7 +108,7 @@ For exemple let's get an optic that focuses on the city of the first user in our
 // @include: main
 // ---cut---
 
-const onCity = onUsers[0].address.city;
+const cityOptic = usersOptic[0].address.city;
 //    ^?
 ```
 
@@ -116,13 +116,13 @@ Now we can directly read and update the city of the first user with this optic:
 
 ```ts twoslash
 // @include: main
-const onCity = onUsers[0].address.city;
+const cityOptic = usersOptic[0].address.city;
 // ---cut---
-onCity.get(); // "New York"
+cityOptic.get(); // "New York"
 
-onCity.set("Boston");
+cityOptic.set("Boston");
 
-onCity.get(); // "Boston"
+cityOptic.get(); // "Boston"
 ```
 
 <details>
@@ -155,12 +155,12 @@ Another example:
 ```ts twoslash
 // @include: main
 // ---cut---
-const onJeanneStreet = onUsers[1].address.street;
+const jeanneStreetOptic = usersOptic[1].address.street;
 //    ^?
 
-onJeanneStreet.number.set(42);
+jeanneStreetOptic.number.set(42);
 
-onJeanneStreet.get(); // { name: "Rue de Rivoli", number: 42 }
+jeanneStreetOptic.get(); // { name: "Rue de Rivoli", number: 42 }
 ```
 
 :::tip
@@ -181,12 +181,12 @@ Call the `useOptic` hook with an optic, similarily to `useState` it returns a tu
 ```tsx twoslash
 // @include: main
 
-const onJeanneStreet = onUsers[1].address.street;
+const jeanneStreetOptic = usersOptic[1].address.street;
 // ---cut---
 import { useOptic } from "@optics/react";
 
 const StreetForm = () => {
-  const [street, setStreet] = useOptic(onJeanneStreet);
+  const [street, setStreet] = useOptic(jeanneStreetOptic);
 
   return (
     <div>
@@ -213,9 +213,11 @@ But you can use optics directly instead, especially if you're only updating a su
 
 ```tsx twoslash
 // @include: main
-const onJeanneStreet = onUsers[1].address.street;
+const jeanneStreetOptic = usersOptic[1].address.street;
 // ---cut---
-<input onChange={(e) => onJeanneStreet.number.set(parseInt(e.target.value))} />;
+<input
+  onChange={(e) => jeanneStreetOptic.number.set(parseInt(e.target.value))}
+/>;
 ```
 
 </details>
@@ -226,11 +228,11 @@ The component will re-render when the street changes, whether it is changed from
 
 ```ts twoslash
 // @include: main
-const onJeanneStreet = onUsers[1].address.street;
+const jeanneStreetOptic = usersOptic[1].address.street;
 // ---cut---
 
 // outside of the component
-onJeanneStreet.number.set((prev) => prev + 1);
+jeanneStreetOptic.number.set((prev) => prev + 1);
 
 // StreetFrom re-renders 🔄
 ```
@@ -239,10 +241,10 @@ However the component will not re-render if an unrelated part of the state chang
 
 ```ts twoslash
 // @include: main
-const onJeanne = onUsers[1];
+const jeanneOptic = usersOptic[1];
 // ---cut---
 
-onJeanne.age.set((prev) => prev + 1);
+jeanneOptic.age.set((prev) => prev + 1);
 
 // Jeanne's street reference hasn't changed, StreetForm doesn't re-render 🚫
 ```
@@ -255,11 +257,11 @@ Instead of referencing the optic directly, the component can accept one **via it
 import { useOptic, Optic } from "@optics/react";
 
 interface Props {
-  onStreet: Optic<{ name: string; number: number }>;
+  streetOptic: Optic<{ name: string; number: number }>;
 }
 
-const StreetForm = ({ onStreet }: Props) => {
-  const [street, setStreet] = useOptic(onStreet);
+const StreetForm = ({ streetOptic }: Props) => {
+  const [street, setStreet] = useOptic(streetOptic);
   // ...
 };
 ```
@@ -271,20 +273,20 @@ Now `StreetForm` isn't **coupled** to a specific part of the state anymore, it c
 import { Optic } from "@optics/react";
 
 interface Props {
-  onStreet: Optic<{ name: string; number: number }>;
+  streetOptic: Optic<{ name: string; number: number }>;
 }
 
-const StreetForm = ({ onStreet }: Props) => {
+const StreetForm = ({ streetOptic }: Props) => {
   return (<></>) as React.JSX.Element;
 };
 
 // ---cut---
 <>
   {/* Form for john's street */}
-  <StreetForm onStreet={onUsers[0].address.street} />
+  <StreetForm streetOptic={usersOptic[0].address.street} />
 
   {/* Form for Jeanne's street */}
-  <StreetForm onStreet={onUsers[1].address.street} />
+  <StreetForm streetOptic={usersOptic[1].address.street} />
 </>;
 ```
 

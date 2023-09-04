@@ -28,16 +28,16 @@ type Result<T> =
   | { type: "success"; value: T }
   | { type: "failure"; errorMessage: string };
 
-const onResult = createState<Result<number>>({ type: "success", value: 42 });
+const resultOptic = createState<Result<number>>({ type: "success", value: 42 });
 
-const onSuccess = onResult.refine((res) => res.type === "success" && res);
+const successOptic = resultOptic.refine((res) => res.type === "success" && res);
 //    ^?
 
-onSuccess.get(); // { type: 'success', value: 42 }
+successOptic.get(); // { type: 'success', value: 42 }
 
-onResult.set({ type: "failure", errorMessage: "Catastrophic meltdown" });
+resultOptic.set({ type: "failure", errorMessage: "Catastrophic meltdown" });
 
-onSuccess.get(); // undefined
+successOptic.get(); // undefined
 ```
 
 ### - On a built-in type
@@ -46,9 +46,9 @@ onSuccess.get(); // undefined
 import { createState } from "@optics/react";
 // ---cut---
 
-const onUnknownValue = createState<unknown>(42);
+const unknownValueOptic = createState<unknown>(42);
 
-const onNumber = onUnknownValue.refine((val) => typeof val === "number" && val);
+const numberOptic = unknownValueOptic.refine((x) => typeof x === "number" && x);
 //    ^?
 ```
 
@@ -67,9 +67,9 @@ function isUser(value: unknown): value is User {
   return typeof (value as User).userName === "string";
 }
 
-const onState = createState(untypedInitUser());
+const stateOptic = createState(untypedInitUser());
 //    ^?
 
-const onMyType = onState.refine((value) => isUser(value) && value);
+const myTypeOptic = stateOptic.refine((value) => isUser(value) && value);
 //    ^?
 ```
