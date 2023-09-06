@@ -1,0 +1,71 @@
+---
+title: Lists
+---
+
+With an optic focused on an array, it's often useful to **derive an optic for each element of the array** (e.g. to loop over these optics and render a list from it).
+
+You can do that with the **`For`** component.  
+It takes an optic focused on an array, a `getKey` function,
+and a render function that will be called for each element with an optic focused on it:
+
+```tsx twoslash
+import React from "react";
+import { Optic } from "@optics/react";
+type User = {
+  name: string;
+  age: number;
+  id: string;
+};
+
+declare const User: ({
+  userOptic,
+}: {
+  userOptic: Optic<User>;
+}) => React.ReactElement;
+
+// ---cut---
+import { For } from "@optics/react";
+
+type Props = {
+  usersOptic: Optic<User[]>;
+};
+
+const Users = ({ usersOptic }: Props) => (
+  <For optic={usersOptic} getKey={(user) => user.id}>
+    {(userOptic) => <User userOptic={userOptic} />}
+  </For>
+);
+```
+
+:::tip
+The component calling `For` doesn't need to subscribe itself to the optic.
+:::
+
+:::info Keys
+The `getKey` function is used to compute a key for each element in the array.  
+This is used to prevent the optics from being recreated when the array is modified. When an
+element changes place in the array, the optic focused on this element is reused and doesn't change reference.
+
+Keys for optics serve the same purpose as [keys in React](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key),
+in fact the `For` component injects these same keys in the React elements it renders, so you don't have to it yourself.
+:::
+
+### useDeriveOptics
+
+`For` is simply a memo-ed component that internally calls the `useDeriveOptics` hook.  
+You can use this hook directly, in case you want to derive an array of optics for something else than rendering a list of components.
+
+```ts twoslash
+import { Optic } from "@optics/react";
+type User = {
+  name: string;
+  age: number;
+  id: string;
+};
+declare const usersOptic: Optic<User[]>;
+// ---cut---
+import { useDeriveOptics } from "@optics/react";
+
+const optics = useDeriveOptics(usersOptic, (user) => user.id);
+//    ^?
+```
