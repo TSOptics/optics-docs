@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-title: useOpticReducer()
+title: useOpticReducer
 ---
 
 # useOpticReducer(optic, reducer): [value, dispatch]
@@ -19,7 +19,7 @@ It takes as argument an optic and a reducer function, and it returns the focused
 
 It works pretty much just like React `useReducer`,
 you dispatch an action and the reducer computes the next state from the action and the current state.  
-The only difference is that you can use a reducer that takes a [pure optic](../../Guides/pure_optic) as third argument. With it you can derive new optics to handle immutable updates inside of the reducer with the `get` and `set` methods.
+The only difference is that you can use a reducer that takes a [pure optic](../../../Guides/pure_optic) as third argument. With it you can derive new optics to handle immutable updates inside of the reducer with the `get` and `set` methods.
 
 ### Example:
 

@@ -1,23 +1,25 @@
 ---
-title: .values()
+title: values
 sidebar_position: 10
 ---
 
-# .values(): Optic
+# values(): Lens
 
 ```ts
-Optic<A extends Record<string, infer Value>>.values: () => Optic<Value[]>;
+values: <A>() => Lens<A[], Record<string, A>>;
 ```
 
 ---
 
-Analogous to [Object.values](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/values), this method returns an optic focused on the object's values.
+This combinator, when passed to `derive`, returns an optic focused on the values of the focused record.
+It is useful to map over a the values of a record.
 
 ### Example:
 
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
+import { values } from "@optics/react/combinators";
 
 const capitalsOptic = createState<Record<string, string>>({
   France: "paris",
@@ -25,7 +27,7 @@ const capitalsOptic = createState<Record<string, string>>({
   Australia: "canberra",
 });
 
-const valuesOptic = capitalsOptic.values();
+const valuesOptic = capitalsOptic.derive(values());
 //    ^?
 
 valuesOptic.get(); // ['paris', 'roma', 'canberra'];

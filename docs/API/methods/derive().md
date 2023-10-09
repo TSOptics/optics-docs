@@ -6,14 +6,13 @@ sidebar_position: 4
 # .derive(get, set): Optic
 
 ```ts
-Optic<A>.derive: <B>(get: (a: A) => B) => ReadOptic<B>;
-Optic<A>.derive: <B>(get: (a: A) => B, set: (b: B, a: A) => A) => Optic<B>;
+Optic<A>.derive: <B>(selector: { get: (a: A) => B }) => ReadOptic<B>;
+Optic<A>.derive: <B>(lens: { get: (a: A) => B, set: (b: B, a: A) => A }) => Optic<B>;
 ```
 
 ---
 
-The `derive` method allows you to **derive a new optic from the current one** with a custom get and set function.  
-All the built-in methods in this library can be implemented using `derive`.
+The `derive` method allows you to **derive a new optic from the current one** with a custom get and set function.
 
 - The `get` function is a simple **selector**, returning a new value derived from what the current optic is focused on.
 - The `set` function lets you to specify how to update the original value when the derived one is updated. It is optional, if you don't pass it the method returns a `ReadOptic`.
@@ -32,10 +31,10 @@ import { createState } from "@optics/react";
 
 const millisecondsOptic = createState(15_000);
 
-const secondsOptic = millisecondsOptic.derive(
-  (ms) => ms / 1000,
-  (seconds) => seconds * 1000
-);
+const secondsOptic = millisecondsOptic.derive({
+  get: (ms) => ms / 1000,
+  set: (seconds) => seconds * 1000,
+});
 ```
 
 Here our `secondsOptic` optic allows us to read and manipulate our time measurement in seconds even though it is represented in milliseconds in our state.
@@ -60,7 +59,7 @@ If you don't pass a `set` function you get a `ReadOptic`, an optic that can't be
 import { createState } from "@optics/react";
 const millisecondsOptic = createState(15_000);
 // ---cut---
-const secondsOptic = millisecondsOptic.derive((ms) => ms / 1000);
+const secondsOptic = millisecondsOptic.derive({ get: (ms) => ms / 1000 });
 //    ^?
 ```
 
@@ -71,10 +70,10 @@ import { createState } from "@optics/react";
 // ---cut---
 const objectOptic = createState({ firstName: "Aaron", lastName: "Schwartz" });
 
-const tupleOptic = objectOptic.derive(
-  ({ firstName, lastName }) => [firstName, lastName] as const,
-  ([firstName, lastName]) => ({ firstName, lastName })
-);
+const tupleOptic = objectOptic.derive({
+  get: ({ firstName, lastName }) => [firstName, lastName] as const,
+  set: ([firstName, lastName]) => ({ firstName, lastName }),
+});
 // The original optic is focused on an object while the derived optic is focused on a tuple
 ```
 
@@ -85,10 +84,10 @@ import { createState } from "@optics/react";
 // ---cut---
 const personOptic = createState({ firstName: "Aaron", lastName: "Schwartz" });
 
-const lastNameOptic = personOptic.derive(
-  (person) => person.lastName,
-  (lastName, person) => ({ ...person, lastName })
-);
+const lastNameOptic = personOptic.derive({
+  get: (person) => person.lastName,
+  set: (lastName, person) => ({ ...person, lastName }),
+});
 ```
 
 :::info

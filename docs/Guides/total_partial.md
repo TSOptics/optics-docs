@@ -116,15 +116,17 @@ userOptics[0].contact.phone;
 :::
 
 Deriving optics from properties of optional objects is not the only way to get partial optics.  
-For exemple with an optic focused on an array, the [`findFirst`](<../API/methods/array/findFirst()>) method returns a partial optic because no element of the array might match the predicate.  
-Or again the [`if`](<../API/methods/if()>) method returns a partial optic because the condition might not be met by the focused value:
+For exemple with an optic focused on an array, the [`find`](../API/combinators/find.md) combinators returns a partial optic because no element of the array might match the predicate.  
+Or again the [`cond`](../API/combinators/cond.md) combinator returns a partial optic because the condition might not be met by the focused value:
 
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
+import { cond } from "@optics/react/combinators";
+
 const numberOptic = createState(42);
 
-const evenNumberOptic = numberOptic.if((n) => n % 2 === 0);
+const evenNumberOptic = numberOptic.derive(cond((n) => n % 2 === 0));
 //    ^?
 
 evenNumberOptic.get(); // 42
@@ -153,9 +155,10 @@ However the reverse is not true, assigning a partial optic to a total one (narro
 ```ts twoslash
 // @errors: 2322
 import { createState, Optic, total } from "@optics/react";
+import { cond } from "@optics/react/combinators";
 // ---cut---
 
-const evenNumberOptic = createState(42).if((n) => n % 2 === 0);
+const evenNumberOptic = createState(42).derive(cond((n) => n % 2 === 0));
 //    ^?
 
 const numberTotalOptic: Optic<number, total> = evenNumberOptic;

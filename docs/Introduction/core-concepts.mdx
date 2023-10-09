@@ -102,44 +102,21 @@ const { age, name } = jeanneOptic;
 
 :::
 
-#### Methods
+### derive method
 
-Calling a property is not the only way to decompose an optic, just like references you can call methods on them.
-It's a way to derive new optics not from a property but from a condition, a transformation, ...
+In addition to calling a property you can also derive new optics manually with the `derive` method.
 
-For example if we want to focus on the oldest user:
-
-```ts twoslash
-// @include: main
-const jeanneAgeOptic = usersOptic[1].age;
-// ---cut---
-
-const oldestUserOptic = usersOptic.max((user) => user.age);
-
-oldestUserOptic.get(); // { name: "John", age: 42, address: { ... } }
-
-jeanneAgeOptic.set(80);
-
-oldestUserOptic.get(); // { name: "Jeanne", age: 80, address: { ... } }
-```
-
-Here `oldestUserOptic` will always point to the oldest user, so when we age poor Jeanne by 47 years, she becomes the oldest user and the optic points to her now.
-
-The [`max`](<../API/Methods/array/max()>), [`min`](<../API/Methods/array/min()>) or [`findFirst`](<../API/Methods/array/findFirst()>) methods are available when the focused type is an array, the [`entries`](<../API/Methods/object/entries()>) and [`values`](<../API/Methods/object/values()>) methods when it's a record,
-and some methods are available for all optics like [`if`](<../API/Methods/if()>) or [`refine`](<../API/Methods/refine()>).
-
-They all could be implemented with the [`derive`](<../API/Methods/derive()>) method, which lets you manually derive new optics.
-It takes two parameters, a `get` function to derive a new value from the original one (sometimes called a **selector**), and a `set` to update the original value from the derived one:
+It takes an object with two functions, a `get` to derive a new value from the original one (sometimes called a **selector**), and a `set` to update the original value from the derived one:
 
 ```ts twoslash
 // @include: main
 const jeanneOptic = usersOptic[1];
 // ---cut---
 
-const jeanneStreetTupleOptic = jeanneOptic.address.street.derive(
-  ({ name, number }) => [name, number] as const,
-  ([name, number]) => ({ name, number })
-);
+const jeanneStreetTupleOptic = jeanneOptic.address.street.derive({
+  get: ({ name, number }) => [name, number] as const,
+  set: ([name, number]) => ({ name, number }),
+});
 ```
 
 Here we pass a `get` function to transform the street object into a tuple, and a `set` that does the reverse transformation (from tuple to object).  
@@ -148,10 +125,10 @@ Now we can manipulate the street as a tuple even though it is still represented 
 ```ts twoslash
 // @include: main
 const jeanneOptic = usersOptic[1];
-const jeanneStreetTupleOptic = jeanneOptic.address.street.derive(
-  ({ name, number }) => [name, number] as const,
-  ([name, number]) => ({ name, number })
-);
+const jeanneStreetTupleOptic = jeanneOptic.address.street.derive({
+  get: ({ name, number }) => [name, number] as const,
+  set: ([name, number]) => ({ name, number }),
+});
 
 // ---cut---
 
@@ -175,9 +152,35 @@ const tupleOptic = streetOptic.derive(
 );
 ```
 
+### Combinators
+
+A combinator is simply a function that returns an object with a get and a set, that you can call inside `derive` to get a new optic.  
+The library exports several of these functions under `@optics/react/combinators`, like `find`, `filter`, `cond` or `max`.
+
+For example if we want to focus on the oldest user:
+
+```ts twoslash
+// @include: main
+const jeanneAgeOptic = usersOptic[1].age;
+// ---cut---
+import { max } from "@optics/react/combinators";
+
+const oldestUserOptic = usersOptic.derive(max((user) => user.age));
+
+oldestUserOptic.get(); // { name: "John", age: 42, address: { ... } }
+
+jeanneAgeOptic.set(80);
+
+oldestUserOptic.get(); // { name: "Jeanne", age: 80, address: { ... } }
+```
+
+Here `oldestUserOptic` will always point to the oldest user, so when we age poor Jeanne by 47 years, she becomes the oldest user and the optic points to her now.
+
+You are encouraged to create your own combinators if you don't find what you need in the library. They will act as reusable building blocks for your optics.
+
 ## Compose
 
-We just saw that we can decompose optics (top-down) but we actually can also do the opposite,
+We just saw that we can decompose optics (top-down) with props and `derive`, but we actually can also do the opposite,
 meaning we can create new optics by composing already existing optics together (**bottom-up composition**).
 
 To illustrate let's create a new organization with a name, and a list of employees:
@@ -461,7 +464,7 @@ Coupling hurts reusability but also **testability**: we can't easily render the 
 since we need to carry with us the surrounding context that the selector needs to get the data.
 
 And that's where lies the problem, **the component shouldn't have to know the shape of the global state**.  
-Its only job should be rendering a user, no matter where it comes from.
+Its only job should be rendering a user, irrespective of where it comes from.
 
 :::info
 We could split our component into _smart_ and _dumb_ ones (or _container_ and _presentational_) to keep the dumb component decoupled from the state,
@@ -565,6 +568,6 @@ you know every important concept there is to know about state management with op
 
 To further your knowledge you can go through the following guides:
 
-- [total and partial](../Guides/total_partial): understand how a total optic will always yield a value while it might not be the case for a partial one.
-- [Map/Reduce](../Guides/map_reduce): learn how to focus multiple values at a time, and then how to **reduce** the focus back a single value.
-- [Forms](../Guides/forms): learn how to build performant and scalable forms by controlling your inputs with optics.
+- [total and partial](../../Guides/total_partial): understand how a total optic will always yield a value while it might not be the case for a partial one.
+- [Map/Reduce](../../Guides/map_reduce): learn how to focus multiple values at a time, and then how to **reduce** the focus back a single value.
+- [Forms](../../Guides/forms): learn how to build performant and scalable forms by controlling your inputs with optics.

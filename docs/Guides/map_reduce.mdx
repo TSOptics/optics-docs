@@ -157,8 +157,10 @@ We can see that if we look at our state, now that we've applied all these transf
 
 ## Reduce
 
-Mapped optics have special methods called **reduce** methods.  
-They yield new optics that, from the originally focused values, **reduce** them into a new one (a bit like JavaScript's `Array.reduce`).
+Mapped optics have access to a method called **reduce**.  
+It allows you to derive a new optic from the the values you're mapping over.
+
+The function you pass to `reduce` takes the array of values we're mapping over as its argument, and it returns either multiple of these values or a single one.
 
 For example to focus on all attractions sorted by name...:
 
@@ -166,12 +168,16 @@ For example to focus on all attractions sorted by name...:
 // @include: main
 const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
-const sortedAttractionsOptic = attractionsOptic.reduceSort((a, b) =>
-  a.localeCompare(b)
+const sortedAttractionsOptic = attractionsOptic.reduce((attractions) =>
+  [...attractions].sort((a, b) => a.value.localeCompare(b.value))
 );
 
 sortedAttractionsOptic.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic', 'Great White Throne', 'Half Dome', 'Mariposa Grove', 'Old Faithful']
 ```
+
+:::info
+Each value in the array is wrapped in an object with a `value` property, that's why we're using `a.value` and `b.value` in the sort function.
+:::
 
 ... and then to focus on the first three:
 
@@ -181,7 +187,9 @@ const attractionsOptic = stateOptic.map().attractions.map();
 declare const sortedAttractionsOptic: typeof attractionsOptic;
 // ---cut---
 
-const firstThreeSortedOptic = sortedAttractionsOptic.reduceSlice(0, 3);
+const firstThreeSortedOptic = sortedAttractionsOptic.reduce((attractions) =>
+  attractions.slice(0, 3)
+);
 
 firstThreeSortedOptic.get(); // ['Angels Landing', 'El Capitan', 'Grand Prismatic']
 firstThreeSortedOptic.set((prev) => prev.toUpperCase());
@@ -191,7 +199,8 @@ attractionsOptic.get(); // ['ANGELS LANDING', 'Great White Throne', 'Half Dome',
 
 ### Back to one (or none)
 
-The above examples return new `mapped` optics but some reduce methods can also give us a `partial` optic by **reducing back to a single value**.
+The examples above return a mapped optic because we're returning multiple values,
+but you can also **focus back on a single element** simply by returning it.
 
 For example to focus on the first attraction starting with the letter G:
 
@@ -200,8 +209,8 @@ For example to focus on the first attraction starting with the letter G:
 const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
 
-const firstStartingWithGOptic = attractionsOptic.reduceFindFirst((attraction) =>
-  attraction.startsWith("G")
+const firstStartingWithGOptic = attractionsOptic.reduce((attractions) =>
+  attractions.find((attraction) => attraction.value.startsWith("G"))
 );
 
 firstStartingWithGOptic.get(); // 'Great White Throne'
@@ -215,7 +224,11 @@ Or to focus on the attraction with the shortest name:
 const attractionsOptic = stateOptic.map().attractions.map();
 // ---cut---
 
-const shortestNameOptic = attractionsOptic.reduceMin((name) => name.length);
+const shortestNameOptic = attractionsOptic.reduce((attractions) =>
+  attractions.reduce((acc, cv) =>
+    cv.value.length < acc.value.length ? cv : acc
+  )
+);
 
 shortestNameOptic.get(); // 'Half Dome'
 // ^?
@@ -224,46 +237,3 @@ shortestNameOptic.get(); // 'Half Dome'
 :::info
 We get a **partial optic** instead of a total one because the mapped optic might yield no value at all, in case the arrays we mapped over are empty.
 :::
-
-<details>
-  <summary>Reduce methods vs Array methods</summary>
-
-You might have noticed that the reduce methods look a lot like the methods
-available to optics focused on arrays (e.g.
-`reduceFindFirst` vs `findFirst`).  
-The difference is that array methods only operate on the array that's currently focused by the optic,
-while reduce methods operate on the whole mapping.
-
-It means that ...
-
-```ts twoslash
-// @include: main
-const nationalParksOptic = stateOptic.map();
-// ---cut---
-const longestForEachParkOptic = nationalParksOptic.attractions.max(
-  (attraction) => attraction.length
-);
-
-longestForEachParkOptic.get(); // ['Great White Throne', 'Mariposa Grove', 'Grand Prismatic']
-// ^?
-```
-
-... is different from:
-
-```ts twoslash
-// @include: main
-const nationalParksOptic = stateOptic.map();
-// ---cut---
-
-const mostAttractionsOptic = nationalParksOptic.attractions.reduceMax(
-  (attractions) => attractions.length
-);
-
-mostAttractionsOptic.get(); // ['Half Dome', 'El Capitan', 'Mariposa Grove']
-// ^?
-```
-
-The first example is a `mapped` optic that focuses on the attraction with the longest name for each national park.  
-The second example is a `partial` optic focused on the attractions of the national park that has the most attractions (Yosemite).
-
-</details>

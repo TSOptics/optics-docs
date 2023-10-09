@@ -1,17 +1,17 @@
 ---
-title: .refine()
+title: refine
 sidebar_position: 6
 ---
 
-# .refine(refiner): Optic
+# refine(refiner): PartialLens
 
 ```ts
-Optic<A>.refine = <B>(refiner: (a: A) => B | false) => Optic<B, partial>;
+refine = <A, B extends A>(refiner: (a: A) => B | false) => PartialLens<B, A>;
 ```
 
 ---
 
-This method allows you to _narrow_ the type focused by the original optic.  
+This combinator allows you to _narrow_ the type focused by the optic it is passed to.  
 It returns a new partial optic focused on the original value in its narrowed type, or **undefined** if the narrowing failed.
 
 The `refiner` function must return the original value in its narrowed type or `false` if it can't be narrowed to this type.
@@ -23,6 +23,7 @@ The `refiner` function must return the original value in its narrowed type or `f
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
+import { refine } from "@optics/react/combinators";
 
 type Result<T> =
   | { type: "success"; value: T }
@@ -30,10 +31,12 @@ type Result<T> =
 
 const resultOptic = createState<Result<number>>({ type: "success", value: 42 });
 
-const successOptic = resultOptic.refine((res) => res.type === "success" && res);
-//    ^?
+const successOptic = resultOptic.derive(
+  refine((res) => res.type === "success" && res)
+);
 
 successOptic.get(); // { type: 'success', value: 42 }
+//    ^?
 
 resultOptic.set({ type: "failure", errorMessage: "Catastrophic meltdown" });
 
@@ -45,11 +48,20 @@ successOptic.get(); // undefined
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
+import { refine } from "@optics/react/combinators";
 
 const unknownValueOptic = createState<unknown>(42);
 
-const numberOptic = unknownValueOptic.refine((x) => typeof x === "number" && x);
+const numberOptic = unknownValueOptic.derive(
+  refine((x) => typeof x === "number" && x)
+);
+
+numberOptic.get(); // 42
 //    ^?
+
+unknownValueOptic.set("Hello world");
+
+numberOptic.get(); // undefined
 ```
 
 ### - On a user-defined type with a type-guard
@@ -58,6 +70,7 @@ const numberOptic = unknownValueOptic.refine((x) => typeof x === "number" && x);
 import { createState } from "@optics/react";
 declare const untypedInitUser: () => any;
 // ---cut---
+import { refine } from "@optics/react/combinators";
 
 type User = {
   userName: string;
@@ -70,6 +83,10 @@ function isUser(value: unknown): value is User {
 const stateOptic = createState(untypedInitUser());
 //    ^?
 
-const myTypeOptic = stateOptic.refine((value) => isUser(value) && value);
+const myTypeOptic = stateOptic.derive(
+  refine((value) => isUser(value) && value)
+);
+
+myTypeOptic.get(); // { userName: 'John Doe' }
 //    ^?
 ```

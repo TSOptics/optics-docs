@@ -1,17 +1,17 @@
 ---
-title: .entries()
+title: entries
 sidebar_position: 9
 ---
 
-# .entries(): Optic
+# entries(): Lens
 
 ```ts
-Optic<A extends Record<string, infer Value>>.entries: () => Optic<[key: string, value: Value][]>;
+entries: <A>() => TotalLens<[string, A][], Record<string, A>>;
 ```
 
 ---
 
-Analogous to [Object.entries](https://developer.mozilla.org/docs/web/javascript/reference/global_objects/object/entries), this method returns an optic focused on the object's `[key, value]` pairs.  
+This combinator, when passed to `derive`, returns an optic focused on the entries of the focused record.
 It is useful to map over a record, allowing you to change both keys and values.
 
 ### Example:
@@ -19,6 +19,8 @@ It is useful to map over a record, allowing you to change both keys and values.
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
+import { entries } from "@optics/react/combinators";
+
 const olympicCitiesOptic = createState<Record<string, number>>({
   paris: 2,
   london: 3,
@@ -26,7 +28,7 @@ const olympicCitiesOptic = createState<Record<string, number>>({
   tokyo: 2,
 });
 
-const entriesOptic = olympicCitiesOptic.entries();
+const entriesOptic = olympicCitiesOptic.derive(entries());
 //    ^?
 
 entriesOptic.get(); // [["paris", 2], ["london", 3], ["losAngeles", 2], ["tokyo", 2]];

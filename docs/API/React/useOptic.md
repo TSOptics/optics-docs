@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: useOptic()
+title: useOptic
 ---
 
 # useOptic(optic): [value, setValue]
