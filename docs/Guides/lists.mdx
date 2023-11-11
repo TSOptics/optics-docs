@@ -50,22 +50,35 @@ Keys for optics serve the same purpose as [keys in React](https://react.dev/lear
 in fact the `For` component injects these same keys in the React elements it renders, so you don't have to it yourself.
 :::
 
-### useDeriveOptics
+### Mapped Optics
 
-`For` is simply a memo-ed component that internally calls the `useDeriveOptics` hook.  
-You can use this hook directly, in case you want to derive an array of optics for something else than rendering a list of components.
+`For` can also iterate over [**mapped optics**](../map_reduce):
 
-```ts twoslash
-import { Optic } from "@optics/react";
+```tsx twoslash
+import React from "react";
+import { Optic, mapped } from "@optics/react";
 type User = {
   name: string;
   age: number;
   id: string;
 };
-declare const usersOptic: Optic<User[]>;
-// ---cut---
-import { useDeriveOptics } from "@optics/react";
 
-const optics = useDeriveOptics(usersOptic, (user) => user.id);
-//    ^?
+declare const User: ({
+  userOptic,
+}: {
+  userOptic: Optic<User>;
+}) => React.ReactElement;
+
+// ---cut---
+import { For } from "@optics/react";
+
+type Props = {
+  usersOptic: Optic<User, mapped>;
+};
+
+const Users = ({ usersOptic }: Props) => (
+  <For mappedOptic={usersOptic} getKey={(user) => user.id}>
+    {(userOptic) => <User userOptic={userOptic} />}
+  </For>
+);
 ```

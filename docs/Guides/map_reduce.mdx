@@ -155,9 +155,31 @@ We can see that if we look at our state, now that we've applied all these transf
 
 :::
 
+### For component
+
+The `For` component iterates over the values of a mapped optic and gives you a new optic for each of them:
+
+```tsx twoslash
+import { Optic, mapped } from "@optics/react";
+declare const attractionsOptic: Optic<string, mapped>;
+declare const Attraction: (props: {
+  attractionOptic: Optic<string>;
+}) => JSX.Element;
+// ---cut---
+import { For } from "@optics/react";
+
+const Attractions = () => {
+  return (
+    <For mappedOptic={attractionsOptic} getKey={(name) => name}>
+      {(attractionOptic) => <Attraction attractionOptic={attractionOptic} />}
+    </For>
+  );
+};
+```
+
 ## Reduce
 
-Mapped optics have access to a method called **reduce**.  
+Mapped optics have access to a method called **reduce**.
 It allows you to derive a new optic from the the values you're mapping over.
 
 The function you pass to `reduce` takes the array of values we're mapping over as its argument, and it returns either multiple of these values or a single one.
