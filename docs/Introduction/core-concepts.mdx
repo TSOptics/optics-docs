@@ -147,9 +147,9 @@ const jeanneOptic = usersOptic[1];
 // ---cut---
 const streetOptic = jeanneOptic.address.street;
 
-const tupleOptic = streetOptic.derive(
-  ({ name, number }) => [name, number] as const
-);
+const tupleOptic = streetOptic.derive({
+  get: ({ name, number }) => [name, number] as const,
+});
 ```
 
 ### Combinators
