@@ -13,8 +13,8 @@ const features = [
         optics.
         <br />
         <br />
-        With properties or methods, <b>decompose</b> your state as suits you
-        with full type-safety and code completion.
+        With properties or custom selectors, <b>decompose</b> your state as
+        suits you with full type-safety and code completion.
         <br />
         <br />
         With optics, focusing on <b>deeply nested</b> values makes updating them
