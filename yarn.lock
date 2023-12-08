@@ -1817,24 +1817,24 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@optics/core@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@optics/core/-/core-0.3.3.tgz#902bb84e598896ca233610419fde771dd9e489fa"
-  integrity sha512-bRPU0nKyGFGR9JfrWrKFhp2srO3mcZhBCB+MigsNx99OfFB1Axgxtk/hFy16Ov9UOtQlbLkT5tHY/7yYAdsTRA==
+"@optics/core@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@optics/core/-/core-0.3.4.tgz#30cab05960f88338d510e8f06eb01b6003a31fa8"
+  integrity sha512-ibkiQqSUc1EA6RT2vBSfqSjzgapMXRiodi7b6OGsOwueAB9EIXob46/9tgnLtIvN5rGGGJ+PZWaaCaksfcUPEg==
 
-"@optics/react@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@optics/react/-/react-0.3.3.tgz#23c4e991df220482f00c2d7298ee92ca75a53fcf"
-  integrity sha512-zCgNhDRYbWgabjERjKqd3UqHLQPfQ9EPQ5B1/HKEx75gd7EJ5fypqd8cnbY46O9mIssNoCrFBOiYb7EA83/PyQ==
+"@optics/react@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@optics/react/-/react-0.3.6.tgz#158b6afe7ee4bf98b84eb972e14aa8794bc16481"
+  integrity sha512-WOsQEnOwFxWJb7zZHW6nfG4VbG1g85GdCxhsYO6RFh5EQvEI/82U0nqBOogCLwZ/u6jDJZF1Xj8sJjQmv8awYw==
   dependencies:
-    "@optics/state" "0.3.3"
+    "@optics/state" "^0.3.6"
 
-"@optics/state@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@optics/state/-/state-0.3.3.tgz#f727adc188c48fb5422c4797ba9c9fd2203e4a90"
-  integrity sha512-OsZpdGGbjH2B/OUGNyd8VDARwo/CoRNM5CtChfuaZNJAdS8ZqKXJqKQ/p2MXYGNLji0LbBWwkqq4UCTCDPq7xw==
+"@optics/state@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@optics/state/-/state-0.3.6.tgz#c408a1b351ded3ec96b7ddac78ab9cd433e4de46"
+  integrity sha512-Rb6V1wgFHhtQabPF/JwcszHrpA14arwElCC0kwNMuDOQ10pEHdKpg6X1pH1gYJ7qgP0zYF4SU8LtGfxeWV4rbQ==
   dependencies:
-    "@optics/core" "0.3.3"
+    "@optics/core" "^0.3.4"
 
 "@polka/url@^1.0.0-next.20":
   version "1.0.0-next.21"

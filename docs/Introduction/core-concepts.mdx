@@ -221,12 +221,12 @@ const interpolOptic = createState({
 
 As you can see the employees we passed are not actual javascript objects but optics we created earlier.
 
-When we call `get` on interpol's optic it automatically **denormalizes** the result and replaces the optics by their respective state:
+When we call get with `{ denormalize: true }` on interpol's optic it **denormalizes** the result and replaces the optics by their respective state:
 
 ```ts twoslash
 // @include: Interpol
 // ---cut---
-const interpol = interpolOptic.get();
+const interpol = interpolOptic.get({ denormalize: true });
 // {
 //   name: "Interpol",
 //   established: "1923",
@@ -242,14 +242,15 @@ We have created a new state which is the composition of its own state and refere
 If we update the state of one of the employees then it's like if the organization state was updated as well
 so its subscribers will be notified (will re-render if they are components).
 
-To illustrate let's give back Jeanne her youth:
+To illustrate let's subscribe to the employees, and then give back Jeanne her youth:
 
 ```ts twoslash
 // @include: Interpol
 const jeanneAgeOptic = jeanneOptic.age;
 // ---cut---
 interpolOptic.employees.subscribe((employees) =>
-  console.log(`one of the ${employees.length} employees was updated`)
+  console.log(`one of the ${employees.length} employees was updated`),
+  { denormalize: true }
 );
 
 jeanneAgeOptic.set(32);
@@ -265,64 +266,10 @@ Using optics in the state of an entity is a way to create **relations** between 
 In a relational database we use foreign keys to represent relations between tables, here optics are used for the same purpose.
 In SQL we use **joins** to get the final denormalized result, with optics it is done automatically.
 
-<details>
-  <summary>Opt-out of denormalization</summary>
-  You can choose to get the normalized result instead, by setting the denormalize
-  option to <code>false</code> when calling <code>get</code>:<br />
-
-```ts twoslash
-// @include: Interpol
-// ---cut---
-const result = interpolOptic.get({ denormalize: false });
-```
-
-The type of the returned value will of course change depending on the value of `denormalize`:
-
-<table>
-<thead>
-<tr>
-<th width="700px">
-denormalize: false
-</th>
-<th width="700px">
-denormalize: true (default)
-</th>
-</tr>
-</thead>
-  <tr>
-    <td>
-
-```ts twoslash
-// @include: Interpol
-const result = interpolOptic.get({ denormalize: false });
-// ---cut---
-
-result;
-// ^?
-```
-
-</td>
-<td>
-
-```ts twoslash
-// @include: Interpol
-const denormalizedResult = interpolOptic.get();
-
-// ---cut---
-
-denormalizedResult;
-//    ^?
-```
-
-</td>
-</tr>
-</table>
-</details>
-
 #### State graph
 
 The organization has a reference to its employees but in turn indivual employee can also have references to other entities.  
-First let's make cities a first-class citizen in our state:
+First let's make cities first-class citizens of our state:
 
 ```twoslash include cities
 import { createState } from "@optics/react";
@@ -374,7 +321,7 @@ const interpolOptic = createState({
 
 // ---cut---
 
-const interpol = interpolOptic.get();
+const interpol = interpolOptic.get({ denormalize: true });
 
 // {
 //   name: "Interpol",
@@ -427,10 +374,28 @@ usersOptic[1].address.city.set(milanOptic);
 Referencing other entities with optics allows us to represent our state as a **graph**,
 where the **nodes** are the entities we build with `createState` and the **edges** are the optics we put in the state to make the relations.
 
-While immutable state is great it however makes it hard to represent such graphs.  
+Such immutable graphs are traditionally hard to represent in plain JavaScript.  
 We usually have to resort to representing the relation with the the id of the target entity and then doing what's essentially a manual join to get our denormalized result.  
-Optics makes the whole process **automatic**, **reactive** and **type-safe**, which is fundamental for applications with non trivial client state,
-as most of them eventually need to represent relations between entities.
+Optics makes the whole process **automatic**, **reactive** and **type-safe**, which is fundamental for non-trivial applications
+as you eventually always end up needing to represent relations between entities as your application state scales.
+
+:::info
+Denormalization is **opt-in**, if you don't set the option to true in `get` or `subscribe` then it simply returns the state as-is, with the optics still in place:
+
+```ts twoslash
+// @include: cities
+import { Optic } from "@optics/react";
+// ---cut---
+const johnOptic = createState({
+  name: "John",
+  age: 42,
+  address: { city: newYorkOptic },
+});
+
+const normalizedJohn = johnOptic.get();
+//    ^?
+```
+:::
 
 :::caution cycles
 We need our graph to be **acyclic** to avoid infinite loops when denormalizing.  
