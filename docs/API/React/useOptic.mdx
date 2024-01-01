@@ -1,0 +1,290 @@
+---
+sidebar_position: 2
+title: useOptic
+---
+
+import { Signature } from "./Signature";
+
+# useOptic
+
+```ts
+function useOptic<T>(optic: Optic<T>): [T, ResultObject];
+```
+
+---
+
+This hook lets your component subscribe to an optic.  
+It returns a tuple with the value, and a set of options.
+
+The component re-renders each time the focused value changes.
+
+```tsx twoslash
+import { useOptic, createState } from "@optics/react";
+
+const countOptic = createState(42);
+
+const MyCount = () => {
+  const [count] = useOptic(countOptic);
+
+  // set new count value
+  countOptic.set(100);
+
+  return <div>count: {count}</div>;
+};
+```
+
+## Options
+
+The hook can take a set of options as a second argument.
+
+### - denormalize
+
+<Signature>
+  <code>boolean</code> <code>default: false</code>
+</Signature>
+
+#
+
+If set to `true` the value returned by `useOptic` is denormalized: the optics referenced in the value are replaced by their respective focused values.
+
+```tsx twoslash
+import { useOptic, createState } from "@optics/react";
+// ---cut---
+const premiumPlanOptic = createState({
+  name: "Premium",
+  price: 100,
+});
+const userOptic = createState({
+  name: "John",
+  plan: premiumPlanOptic,
+});
+
+const [user] = useOptic(userOptic, { denormalize: true });
+//     ^?
+```
+
+## Result
+
+The hook returns a result object as second element of the tuple with the following properties:
+
+```tsx twoslash
+import { useOptic, createState } from "@optics/react";
+const optic = createState([[1, 2, 3]]).map();
+// ---cut---
+const [, { setState, whenFocused, whenType, getOptics, getOpticsFromMapping }] =
+  useOptic(optic);
+```
+
+### - setState
+
+<Signature>
+
+`Dispatch<SetStateAction<T>>`
+
+</Signature>
+
+#
+
+An update function for the optic with a stable reference.  
+Equivalent to: `useCallback((value) => optic.set(value), [optic])`.
+
+### - whenFocused
+
+<Signature>
+
+`<R>(then: (totalOptic: Optic<T, total>) => R) => R | null`
+
+</Signature>
+
+#
+
+This function lets you narrow a `partial` optic (an optic that might be unfocused)
+to a `total` optic (an optic that's always focused, the default behavior).
+
+The narrowed optic is provided as parameter of the callback, the latter only runs if the narrowing succeeds (if the optic is focused on a value).
+
+```tsx twoslash
+import { createState, Optic, partial, useOptic } from "@optics/react";
+type User = { name: string; age: number };
+const UserCard = (props: { userOptic: Optic<User> }) =>
+  ({} as React.ReactElement);
+const userPartialOptic: Optic<User, partial> = createState({
+  name: "John",
+  age: 42,
+});
+// ---cut---
+const [, { whenFocused }] = useOptic(userPartialOptic);
+//                                   ^?
+<>
+  {whenFocused((userTotalOptic) => (
+    <UserCard userOptic={userTotalOptic} />
+    //                    ^?
+  ))}
+</>;
+```
+
+It can also narrow the type of the focused value from nullable to non-nullable:
+
+```tsx twoslash
+import { createState, Optic, total, useOptic } from "@optics/react";
+
+const nullableStringOptic: Optic<string | undefined, total> =
+  createState(undefined);
+// ---cut---
+const [, { whenFocused }] = useOptic(nullableStringOptic);
+//                                   ^?
+whenFocused((stringOptic) => {
+  //         ^?
+});
+```
+
+The function returns `null` if the optic is unfocused.
+
+### - whenType
+
+<Signature>
+
+`<U extends T>(refine: (value: T) => U | false) => <R>(then: (narrowedOptic: Optic<U>) => R) => R | null`
+
+</Signature>
+
+#
+
+This function lets you **narrow** the type of the focused value in the optic.  
+It takes a first callback that narrows the value then returns it,
+and a second callback that only runs if the narrowing succeeds and that has the narrowed optic provided as parameter.
+
+```tsx twoslash
+import { createState, Optic, partial, useOptic } from "@optics/react";
+
+const NumericInput = (props: { numberOptic: Optic<number> }) =>
+  ({} as React.ReactElement);
+
+const Input = (props: { stringOptic: Optic<string> }) =>
+  ({} as React.ReactElement);
+
+const stringOrNumberOptic = createState<string | number>("hello");
+// ---cut---
+
+const [, { whenType }] = useOptic(stringOrNumberOptic);
+//                                ^?
+<>
+  {whenType((value) => typeof value === "number" && value)((numberOptic) => (
+    <NumericInput numberOptic={numberOptic} />
+    //                         ^?
+  ))}
+  {whenType((value) => typeof value === "string" && value)((stringOptic) => (
+    <Input stringOptic={stringOptic} />
+    //                  ^?
+  ))}
+</>;
+```
+
+The function returns `null` if the narrowing fails.
+
+It can also take an [explicit type guard](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates) as first argument:
+
+```tsx twoslash
+import { createState, Optic, useOptic } from "@optics/react";
+type Fish = { swim: () => void };
+type Bird = { fly: () => void };
+
+declare const petOptic: Optic<Fish | Bird>;
+// ---cut---
+function isFish(pet: Fish | Bird): pet is Fish {
+  return (pet as Fish).swim !== undefined;
+}
+
+const [, { whenType }] = useOptic(petOptic);
+//                                ^?
+whenType(isFish)((fishOptic) => {
+  //              ^?
+});
+```
+
+### - getOptics
+
+<Signature>
+
+`(getKey: (t: T[number]) => string) => readonly [key: string, optic: Optic<T[number], total>][];`
+
+</Signature>
+
+#
+
+Only available if the optic is focused on an array, this function derives a new optic for each element of the array.
+
+An element of the array will always have the same associated optic, even if the array is reordered, appended, prepended, ...  
+This is thanks to the `getKey` function that you provide, which returns a unique key for each element of the array.
+
+```tsx twoslash
+import React from "react";
+import { Optic, useOptic } from "@optics/react";
+type User = {
+  name: string;
+  age: number;
+  id: string;
+};
+
+declare const User: ({
+  userOptic,
+}: {
+  userOptic: Optic<User>;
+}) => React.ReactElement;
+
+declare const usersOptic: Optic<User[]>;
+
+// ---cut---
+
+const [, { getOptics }] = useOptic(usersOptic);
+//                                 ^?
+<>
+  {getOptics((user) => user.id).map(([key, userOptic]) => (
+    <User key={key} userOptic={userOptic} />
+    //                         ^?
+  ))}
+</>;
+```
+
+Since keys serve the same purpose as in React, you can reuse the generated key and pass it to the `key` prop of the component.
+
+### - getOpticsFromMapping
+
+<Signature>
+
+`(getKey: (t: T) => string) => readonly [key: string, optic: Optic<T, total>][];`
+
+</Signature>
+
+#
+
+This function is similar to `getOptics`, but it derive the optics from the values of a `mapped` optics instead of an array.
+
+```tsx twoslash
+import React from "react";
+import { Optic, useOptic, mapped } from "@optics/react";
+type User = {
+  name: string;
+  age: number;
+  id: string;
+};
+
+declare const User: ({
+  userOptic,
+}: {
+  userOptic: Optic<User>;
+}) => React.ReactElement;
+
+declare const userMappedOptic: Optic<User, mapped>;
+
+// ---cut---
+
+const [, { getOpticsFromMapping }] = useOptic(userMappedOptic);
+//                                            ^?
+<>
+  {getOpticsFromMapping((user) => user.id).map(([key, userOptic]) => (
+    <User key={key} userOptic={userOptic} />
+    //                         ^?
+  ))}
+</>;
+```
