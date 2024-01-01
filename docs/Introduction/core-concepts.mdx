@@ -104,7 +104,7 @@ const { age, name } = jeanneOptic;
 
 ### derive method
 
-In addition to calling a property you can also derive new optics manually with the [`derive`](../API/methods/derive().md) method.
+In addition to calling a property you can also derive new optics manually with the [`derive`](<../API/methods/derive().md>) method.
 
 It takes an object with two functions, a `get` to derive a new value from the original one (sometimes called a **selector**), and a `set` to update the original value from the derived one:
 
@@ -154,7 +154,7 @@ const tupleOptic = streetOptic.derive({
 
 ### Combinators
 
-A combinator is simply a function that returns an object with a get and a set function. You call the combinator inside [`derive`](../API/methods/derive().md) to get a new optic.  
+A combinator is simply a function that returns an object with a get and a set function. You call the combinator inside [`derive`](<../API/methods/derive().md>) to get a new optic.  
 The library exports several of these functions under `@optics/react/combinators`, like [`find`](../API/combinators/find.md), [`cond`](../API/combinators/cond.md) or [`max`](../API/combinators/max.md).
 
 For example if we want to focus on the oldest user:
@@ -248,8 +248,9 @@ To illustrate let's subscribe to the employees, and then give back Jeanne her yo
 // @include: Interpol
 const jeanneAgeOptic = jeanneOptic.age;
 // ---cut---
-interpolOptic.employees.subscribe((employees) =>
-  console.log(`one of the ${employees.length} employees was updated`),
+interpolOptic.employees.subscribe(
+  (employees) =>
+    console.log(`one of the ${employees.length} employees was updated`),
   { denormalize: true }
 );
 
@@ -395,6 +396,7 @@ const johnOptic = createState({
 const normalizedJohn = johnOptic.get();
 //    ^?
 ```
+
 :::
 
 :::caution cycles
@@ -450,7 +452,7 @@ interface UserProps {
 }
 
 const User = ({ userOptic }: UserProps) => {
-  const [user, setUser] = useOptic(userOptic);
+  const [user] = useOptic(userOptic);
 };
 ```
 
@@ -507,7 +509,7 @@ const User = {} as FC<{ userOptic: Optic<User> }>;
 import { usersOptic } from "./users";
 
 const UserList = () => {
-  const [users, setUsers] = useOptic(usersOptic);
+  const [users] = useOptic(usersOptic);
 
   return (
     <ul>

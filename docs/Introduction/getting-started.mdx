@@ -186,41 +186,20 @@ const jeanneStreetOptic = usersOptic[1].address.street;
 import { useOptic } from "@optics/react";
 
 const StreetForm = () => {
-  const [street, setStreet] = useOptic(jeanneStreetOptic);
+  const [street] = useOptic(jeanneStreetOptic);
 
   return (
     <div>
       <input
         value={street.number}
         type="number"
-        onChange={(e) =>
-          setStreet((prev) => ({ ...prev, number: parseInt(e.target.value) }))
-        }
+        onChange={(e) => jeanneStreetOptic.number.set(parseInt(e.target.value))}
       />
       {street.name}
     </div>
   );
 };
 ```
-
-<details>
-  <summary>
-    Alternative <code>onChange</code>:
-  </summary>
-
-`useOptic` returns a setter for convenience and familiarity.  
-But you can use optics directly instead, especially if you're only updating a subset of the focused state:
-
-```tsx twoslash
-// @include: main
-const jeanneStreetOptic = usersOptic[1].address.street;
-// ---cut---
-<input
-  onChange={(e) => jeanneStreetOptic.number.set(parseInt(e.target.value))}
-/>;
-```
-
-</details>
 
 <br />
 
@@ -261,7 +240,7 @@ interface Props {
 }
 
 const StreetForm = ({ streetOptic }: Props) => {
-  const [street, setStreet] = useOptic(streetOptic);
+  const [street] = useOptic(streetOptic);
   // ...
 };
 ```
