@@ -21,13 +21,14 @@ const name = userOptic.name.get();
 
 :::info total is the default
 When you declare an optic without specifying the second type parameter then it defaults to `total`:  
-`Optic<string>` === `Optic<string, total>`
+`Optic<string>` = `Optic<string, total>`
 :::
 
 ## Partial optics
 
 A partial optic focuses on a value that might not exist.
 
+When you derive new optics from an optional or nullable property, the resulting optics end up `partial`.  
 As an example let's create users with an optional `contact` property:
 
 ```twoslash include main
@@ -51,10 +52,9 @@ const initialUsers: { name: string; contact?: { phone: string } }[] = [
 const userOptics = createState(initialUsers);
 ```
 
-Here some users might not have any contact information, so the `contact` field is optional (hence the question mark).  
-When you have an optic focused on an optional (or nullable) property, then the new optics derived from it will be partial.
+Here some users might not have any contact information, so the `contact` field is optional.
 
-In our case it means every optics we derive from `contact` ends up partial:
+Every optic we derive from `contact` ends up partial:
 
 ```ts twoslash
 // @include: main
@@ -67,8 +67,6 @@ const secondUserPhoneOptic = userOptics[1].contact.phone;
 //    ^?
 ```
 
-An object being nullable doesn't mean we shouldn't be able to focus values inside it.  
-But we should still be made aware of the fact that getting the value could yield `undefined`, and that's what `partial` is for.  
 A partial optic returns `undefined` if one of the value in the path is not present (in our case `contact`), that's why the return type of `get` is <code>T&nbsp;|&nbsp;undefined</code>:
 
 ```ts twoslash
@@ -87,7 +85,7 @@ const gabinsPhone = secondUserPhoneOptic.get();
 // gabinsPhone = undefined
 ```
 
-When trying to update a value that a partial fails to reach then it simply no-op:
+When trying to update a value with a partial that is not focused on a value, the update is ignored:
 
 ```ts twoslash
 // @include: main
@@ -100,8 +98,8 @@ secondUserPhoneOptic.get(); // undefined
 ```
 
 :::tip
-On a plain javascript object if you have to use the **optional chaining operator** `?.` on the path to a property,
-then using the same path on the optic will get you a partial optic (no need to use `?.` on optics though).
+On a plain JS object if you have to use the **optional chaining operator** `?.` on the path to a property,
+then it means using the same path on the optic will get you a partial optic (no need to use `?.` on optics though).
 
 ```ts twoslash
 // @include: main
@@ -115,29 +113,26 @@ userOptics[0].contact.phone;
 
 :::
 
-Deriving optics from properties of optional objects is not the only way to get partial optics.  
-For exemple with an optic focused on an array, the [`find`](../API/combinators/find.md) combinators returns a partial optic because no element of the array might match the predicate.  
-Or again the [`cond`](../API/combinators/cond.md) combinator returns a partial optic because the condition might not be met by the focused value:
+Another way you can end up with partial optics is with some combinators.  
+For exemple with an optic focused on an array, the [`find`](../API/combinators/find.md) combinator returns a partial optic because no element of the array might satisfy the predicate.
 
 ```ts twoslash
 import { createState } from "@optics/react";
 // ---cut---
-import { cond } from "@optics/react/combinators";
+import { find } from "@optics/react/combinators";
 
-const numberOptic = createState(42);
+const numbersOptic = createState([1, 2, 3, 4]);
 
-const evenNumberOptic = numberOptic.derive(cond((n) => n % 2 === 0));
+const greaterThanThreeOptic = numbersOptic.derive(find((n) => n > 3));
 //    ^?
 
-evenNumberOptic.get(); // 42
+greaterThanThreeOptic.get(); // 4
 
-evenNumberOptic.set((n) => n + 1);
-
-numberOptic.get(); // 43
-evenNumberOptic.get(); // undefined
+numbersOptic[3].set(0);
+greaterThanThreeOptic.get(); // undefined
 ```
 
-### Type relations
+## From one to the other
 
 `total` is a subtype of `partial`, meaning we can assign a total optic to a partial one (widening the type):
 
@@ -150,16 +145,36 @@ const numberOptic = createState(42);
 const numberPartialOptic: Optic<number, partial> = numberOptic; // ✅ allowed
 ```
 
-However the reverse is not true, assigning a partial optic to a total one (narrowing the type) fails to compile:
+However the reverse is not true, you can't narrow a `partial` to a `total` as it isn't type-safe:
 
 ```ts twoslash
 // @errors: 2322
 import { createState, Optic, total } from "@optics/react";
-import { cond } from "@optics/react/combinators";
+import { find } from "@optics/react/combinators";
 // ---cut---
 
-const evenNumberOptic = createState(42).derive(cond((n) => n % 2 === 0));
+const evenNumberOptic = createState([1, 2, 3]).derive(find((n) => n % 2 === 0));
 //    ^?
 
 const numberTotalOptic: Optic<number, total> = evenNumberOptic;
 ```
+
+You can cast a `partial` optic to a `total` one with the [`whenFocused`](../API/React/useOptic.mdx#--whenfocused) function returned by `useOptic`:
+
+```tsx twoslash
+import { createState, Optic, partial, useOptic } from "@optics/react";
+
+declare const evenNumberOptic: Optic<number, partial>;
+// ---cut---
+
+const [, { whenFocused }] = useOptic(evenNumberOptic);
+//                                    ^?
+whenFocused((evenNumberTotalOptic) => {
+  //          ^?
+});
+```
+
+The callback will only run when the optic is focused on a value, so that it's safe to cast the optic to a `total` inside it.
+
+In most cases your components should only expect `total` optics in their props.
+Use `whenFocused` to cast the eventual `partial` optics to `total` before passing them to components.
