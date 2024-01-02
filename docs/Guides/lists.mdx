@@ -4,9 +4,7 @@ title: Lists
 
 With an optic focused on an array, it's often useful to **derive an optic for each element of the array** (e.g. to loop over these optics and render a list from it).
 
-You can do that with the **`For`** component.  
-It takes an optic focused on an array, a `getKey` function,
-and a render function that will be called for each element with an optic focused on it:
+`useOptic` returns the [`getOptics`](../API/React/useOptic.mdx#--getoptics) function that lets you do exactly that:
 
 ```tsx twoslash
 import React from "react";
@@ -24,39 +22,39 @@ declare const User: ({
 }) => React.ReactElement;
 
 // ---cut---
-import { For } from "@optics/react";
+import { useOptic } from "@optics/react";
 
 type Props = {
   usersOptic: Optic<User[]>;
 };
 
-const Users = ({ usersOptic }: Props) => (
-  <For optic={usersOptic} getKey={(user) => user.id}>
-    {(userOptic) => <User userOptic={userOptic} />}
-  </For>
-);
+const Users = ({ usersOptic }: Props) => {
+  const [, { getOptics }] = useOptic(usersOptic);
+
+  const optics = getOptics((user) => user.id);
+
+  return optics.map(([key, userOptic]) => (
+    <User key={key} userOptic={userOptic} />
+  ));
+};
 ```
 
-:::tip
-The component calling `For` doesn't need to subscribe itself to the optic.
-:::
-
 :::info Keys
-The `getKey` function is used to compute a key for each element in the array.  
+The function you pass to `getOptics` is used to compute a key for each element in the array.  
 This is used to prevent the optics from being recreated when the array is modified. When an
 element changes place in the array, the optic focused on this element is reused and doesn't change reference.
 
-Keys for optics serve the same purpose as [keys in React](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key),
-in fact the `For` component injects these same keys in the React elements it renders, so you don't have to it yourself.
+Keys for optics serve pretty much the same purpose as [keys in React](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key).  
+In fact you can reuse the the generated key and pass it to the `key` prop of the component you render just like we did in the example above.
 :::
 
-### Mapped Optics
+#### Mapped Optics
 
-`For` can also iterate over [**mapped optics**](../map_reduce):
+The [`getOpticsFromMapping`](../API/React/useOptic.mdx#--getopticsfrommapping) function does the same thing but for [mapped optics](./map_reduce.mdx).
 
 ```tsx twoslash
 import React from "react";
-import { Optic, mapped } from "@optics/react";
+import { Optic } from "@optics/react";
 type User = {
   name: string;
   age: number;
@@ -70,15 +68,19 @@ declare const User: ({
 }) => React.ReactElement;
 
 // ---cut---
-import { For } from "@optics/react";
+import { useOptic, mapped } from "@optics/react";
 
 type Props = {
-  usersOptic: Optic<User, mapped>;
+  userMappedOptic: Optic<User, mapped>;
 };
 
-const Users = ({ usersOptic }: Props) => (
-  <For mappedOptic={usersOptic} getKey={(user) => user.id}>
-    {(userOptic) => <User userOptic={userOptic} />}
-  </For>
-);
+const Users = ({ userMappedOptic }: Props) => {
+  const [, { getOpticsFromMapping }] = useOptic(userMappedOptic);
+
+  const optics = getOpticsFromMapping((user) => user.id);
+
+  return optics.map(([key, userOptic]) => (
+    <User key={key} userOptic={userOptic} />
+  ));
+};
 ```
