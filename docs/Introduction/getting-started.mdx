@@ -2,9 +2,6 @@
 sidebar_position: 2
 ---
 
-import CodeBlock from "@theme/CodeBlock";
-import Admonition from "@theme/Admonition";
-
 # Getting Started
 
 **Optics** is a library to manage global immutable state in TypeScript applications.
@@ -176,7 +173,7 @@ For now don't worry about the `total` type parameter, you'll be able to learn ab
 
 Your React components can subscribe to optics and re-render when the focused states change.
 
-Call the `useOptic` hook with an optic, similarily to `useState` it returns a tuple with the current value and a setter.
+Call the `useOptic` hook with an optic, it returns the current value inside a tuple.
 
 ```tsx twoslash
 // @include: main
@@ -213,7 +210,7 @@ const jeanneStreetOptic = usersOptic[1].address.street;
 // outside of the component
 jeanneStreetOptic.number.set((prev) => prev + 1);
 
-// StreetFrom re-renders 🔄
+// StreetForm re-renders 🔄
 ```
 
 However the component will not re-render if an unrelated part of the state changes.
