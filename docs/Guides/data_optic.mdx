@@ -1,0 +1,81 @@
+---
+title: DataOptic
+---
+
+Optics make working with immutable state painless, but sometimes you may need to perform these immutable updates outside of global state created with [`createState`](../API/createState.md).  
+Examples range from updating React state created with `useState`,
+updating global state in a [Redux reducer](https://redux.js.org/faq/immutable-data#why-is-immutability-required-by-redux)
+or a [Zustand action](https://docs.pmnd.rs/zustand/guides/immutable-state-and-merging),
+to manipulating your GraphQL cache directly [with apollo-client](https://www.apollographql.com/docs/react/caching/cache-interaction/).
+
+A **`DataOptic`** is an Optic that's not focused on global state, but simply on a plain immutable value that you want to **produce new versions of**.  
+It retains all of the benefits of the Optics API but without the state management part (no `subscribe` method).
+
+## Usage
+
+Call the [`focusOn`](../API/focusOn.mdx) function to create a **DataOptic** from a plain value.
+
+```twoslash include main
+import { focusOn } from "@optics/react";
+
+const user = {
+  name: "John Doe",
+  contact: {
+    mail: "foo@bar.com",
+    address: {
+      number: 1,
+      street: "Rue de la paix",
+    },
+  },
+  credits: {
+    gold: { available: 10, blocked: 3 },
+    silver: { available: 30, blocked: 7 },
+  },
+};
+
+const userOptic = focusOn(user);
+```
+
+```ts twoslash
+// @include: main
+```
+
+<br />
+
+- Call `set` everytime you want to apply a modification where the optic is currently focused.  
+  It returns a new `DataOptic` focused on the updated value.
+- Call `get` to retrieve the final value that got all the previous updates applied to it.
+
+```ts twoslash
+// @include: main
+// ---cut---
+const updatedUser = focusOn(user)
+  .contact.address.number.set(10)
+  .credits.gold.available.set((prev) => prev + 5)
+  .get();
+```
+
+It lets us update both the user's street number and his amount of available gold credits **in a single expression**.
+
+```ts {6, 11}
+// updatedUser
+{
+  name: "Vincent",
+  contact: {
+    mails: "foo@bar.com",
+    address: {
+      number: 10,
+      street: "Rue de la paix",
+    },
+  },
+  credits: {
+    gold: { available: 15, blocked: 3 },
+    silver: { available: 30, blocked: 7 },
+  },
+};
+```
+
+## @optics/data
+
+The [`@optics/data`](https://www.npmjs.com/package/@optics/data) package only exports `DataOptic` and the [`focusOn`](../API/focusOn.mdx) function, without the rest of the API related to state management.  
+You can import this package if you are already invested in another state management solution and just want to use Optics to perform immutable updates.
