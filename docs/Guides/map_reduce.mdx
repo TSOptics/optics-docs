@@ -10,8 +10,8 @@ const stateOptic = {} as Optic<{name: string;visitors: number;attractions: strin
 
 ## Map
 
-While a `total` optic is focused on **one** value and a `partial` optic is focused on **zero or one** value, a **mapped** optic is focused on **multiple values**.  
-Such optic can read these values and update them simultaneously.
+While by default an optic is focused on **one** value, and a `partial` optic on **zero or one** value, a **mapped** optic is focused on **multiple values**.  
+A mapped optic can read its focused values, but also update every of them simultaneously.
 
 To illustrate that let's create a new state holding US national parks:
 
@@ -149,15 +149,15 @@ We can see that if we look at our state, now that we've applied all these transf
 
 :::tip cardinality recap
 
-- **total: 1..1**
+- **total: 1..1** _default_
 - **partial: 0..1**
 - **mapped: 0..n**
 
 :::
 
-### For component
+### Derive all optics
 
-The `For` component iterates over the values of a mapped optic and gives you a new optic for each of them:
+The [`getOpticsFromMapping`](../API/React/useOptic.mdx#--getopticsfrommapping) function gets you an optic for each value focused by the mapped optic:
 
 ```tsx twoslash
 import { Optic, mapped } from "@optics/react";
@@ -166,14 +166,14 @@ declare const Attraction: (props: {
   attractionOptic: Optic<string>;
 }) => JSX.Element;
 // ---cut---
-import { For } from "@optics/react";
+import { useOptic } from "@optics/react";
 
 const Attractions = () => {
-  return (
-    <For mappedOptic={attractionsOptic} getKey={(name) => name}>
-      {(attractionOptic) => <Attraction attractionOptic={attractionOptic} />}
-    </For>
-  );
+  const [, { getOpticsFromMapping }] = useOptic(attractionsOptic);
+
+  return getOpticsFromMapping((name) => name).map(([key, attractionOptic]) => (
+    <Attraction attractionOptic={attractionOptic} key={key} />
+  ));
 };
 ```
 
@@ -257,5 +257,5 @@ shortestNameOptic.get(); // 'Half Dome'
 ```
 
 :::info
-We get a **partial optic** instead of a total one because the mapped optic might yield no value at all, in case the arrays we mapped over are empty.
+We get a **partial optic** because the mapped optic might yield no value at all, in case the arrays we mapped over are empty.
 :::

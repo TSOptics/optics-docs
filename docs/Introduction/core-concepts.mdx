@@ -139,7 +139,7 @@ jeanneStreetTupleOptic.get(); // ["Rue de Rivoli", 11]
 jeanneOptic.address.street.get(); // { name: "Rue de Rivoli", number: 11 }
 ```
 
-If we don't pass a `set` function then we get a `ReadOptic`, an optic that can't be updated and acts effectively as a composable selector:
+If we don't pass a `set` function then we get a **read-only** Optic, an optic that can't be updated and acts effectively as a composable selector:
 
 ```ts twoslash
 // @include: main
@@ -535,5 +535,5 @@ you know every important concept there is to know about state management with op
 
 To further your knowledge you can go through the following guides:
 
-- [total and partial](../Guides/total_partial.md): understand how a total optic will always yield a value while it might not be the case for a partial one.
+- [Partial Optics](../Guides/partial_optics.md): understand how a partial optic might not find the value it's focused on.
 - [Map/Reduce](../Guides/map_reduce.mdx): learn how to focus multiple values at a time, and then how to **reduce** the focus back a single value.

@@ -13,7 +13,7 @@ function useOptic<T>(optic: Optic<T>): [T, ResultObject];
 
 ---
 
-This hook lets your component subscribe to an optic.  
+This hook allows your components to subscribe to an optic.  
 It returns a tuple with the value, and a set of options.
 
 The component re-renders each time the focused value changes.
@@ -92,14 +92,14 @@ Equivalent to: `useCallback((value) => optic.set(value), [optic])`.
 
 <Signature>
 
-`<R>(then: (totalOptic: Optic<T, total>) => R) => R | null`
+`<R>(then: (totalOptic: Optic<T>) => R) => R | null`
 
 </Signature>
 
 #
 
 This function lets you narrow a `partial` optic (an optic that might be unfocused)
-to a `total` optic (an optic that's always focused, the default behavior).
+to a total optic (an optic that's always focused, the default behavior).
 
 The narrowed optic is provided as parameter of the callback, the latter only runs if the narrowing succeeds (if the optic is focused on a value).
 
@@ -126,10 +126,9 @@ const [, { whenFocused }] = useOptic(userPartialOptic);
 It can also narrow the type of the focused value from nullable to non-nullable:
 
 ```tsx twoslash
-import { createState, Optic, total, useOptic } from "@optics/react";
+import { createState, Optic, useOptic } from "@optics/react";
 
-const nullableStringOptic: Optic<string | undefined, total> =
-  createState(undefined);
+const nullableStringOptic: Optic<string | undefined> = createState(undefined);
 // ---cut---
 const [, { whenFocused }] = useOptic(nullableStringOptic);
 //                                   ^?
@@ -206,7 +205,7 @@ whenType(isFish)((fishOptic) => {
 
 <Signature>
 
-`(getKey: (t: T[number]) => string) => readonly [key: string, optic: Optic<T[number], total>][];`
+`(getKey: (t: T[number]) => string) => readonly [key: string, optic: Optic<T[number]>][];`
 
 </Signature>
 
@@ -252,7 +251,7 @@ Since keys serve the same purpose as in React, you can reuse the generated key a
 
 <Signature>
 
-`(getKey: (t: T) => string) => readonly [key: string, optic: Optic<T, total>][];`
+`(getKey: (t: T) => string) => readonly [key: string, optic: Optic<T>][];`
 
 </Signature>
 

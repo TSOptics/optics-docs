@@ -1,32 +1,14 @@
 ---
-title: Total/Partial
+title: Partial Optics
 sidebar_position: 1
 ---
 
-# Total and partial optics
+# Partial optics
 
-An optic can either be `total` which means it's focused on **one value**, or `partial`: focused on **zero or one value**.
+By default an optic will always be able to retrieve the value it's focused on, we say that's it's **total**.
 
-`createState` returns a total optic, it will never fail to focus on the root state:
-
-```ts twoslash
-import { createState } from "@optics/react";
-// ---cut---
-
-const userOptic = createState({ name: "Vincent" });
-//    ^?
-const name = userOptic.name.get();
-//    ^?
-```
-
-:::info total is the default
-When you declare an optic without specifying the second type parameter then it defaults to `total`:  
-`Optic<string>` = `Optic<string, total>`
-:::
-
-## Partial optics
-
-A partial optic focuses on a value that might not exist.
+But an optic can also be **partial**, meaning it focuses on a value that might not exist.  
+When you read a value focused by a partial optic you might get `undefined` if the value is not present.
 
 When you derive new optics from an optional or nullable property, the resulting optics end up `partial`.  
 As an example let's create users with an optional `contact` property:
@@ -132,9 +114,9 @@ numbersOptic[3].set(0);
 greaterThanThreeOptic.get(); // undefined
 ```
 
-## From one to the other
+## Narrowing
 
-`total` is a subtype of `partial`, meaning we can assign a total optic to a partial one (widening the type):
+We can assign a total optic to a partial one (widening the type):
 
 ```ts twoslash
 import { createState, Optic, partial } from "@optics/react";
@@ -145,21 +127,21 @@ const numberOptic = createState(42);
 const numberPartialOptic: Optic<number, partial> = numberOptic; // ✅ allowed
 ```
 
-However the reverse is not true, you can't narrow a `partial` to a `total` as it isn't type-safe:
+However the reverse is not true, you can't narrow from partial to a total as it isn't type-safe:
 
 ```ts twoslash
 // @errors: 2322
-import { createState, Optic, total } from "@optics/react";
+import { createState, Optic } from "@optics/react";
 import { find } from "@optics/react/combinators";
 // ---cut---
 
 const evenNumberOptic = createState([1, 2, 3]).derive(find((n) => n % 2 === 0));
 //    ^?
 
-const numberTotalOptic: Optic<number, total> = evenNumberOptic;
+const numberTotalOptic: Optic<number> = evenNumberOptic;
 ```
 
-You can cast a `partial` optic to a `total` one with the [`whenFocused`](../API/React/useOptic.mdx#--whenfocused) function returned by `useOptic`:
+You can cast a `partial` optic to a total one with the [`whenFocused`](../API/React/useOptic.mdx#--whenfocused) function returned by `useOptic`:
 
 ```tsx twoslash
 import { createState, Optic, partial, useOptic } from "@optics/react";
@@ -174,7 +156,7 @@ whenFocused((evenNumberTotalOptic) => {
 });
 ```
 
-The callback will only run when the optic is focused on a value, so that it's safe to cast the optic to a `total` inside it.
+The callback will only run when the optic is focused on a value, so that it's safe to cast the optic to total inside it.
 
-In most cases your components should only expect `total` optics in their props.
-Use `whenFocused` to cast the eventual `partial` optics to `total` before passing them to components.
+In most cases your components should only expect total optics in their props.
+Use `whenFocused` to narrow the eventual `partial` optics before passing them to components.

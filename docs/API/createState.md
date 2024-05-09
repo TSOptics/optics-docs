@@ -6,7 +6,7 @@ sidebar_position: 1
 # createState(initialValue, key?)
 
 ```ts
-function createState<T>(initialValue: T, key?: string): Optic<T, total>;
+function createState<T>(initialValue: T, key?: string): Optic<T>;
 ```
 
 Creates a global state initialized to the value passed as argument.  

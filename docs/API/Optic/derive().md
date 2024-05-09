@@ -6,7 +6,7 @@ sidebar_position: 4
 # .derive(get, set): Optic
 
 ```ts
-Optic<A>.derive: <B>(selector: { get: (a: A) => B }) => ReadOptic<B>;
+Optic<A>.derive: <B>(selector: { get: (a: A) => B }) => Optic<B, readOnly>;
 Optic<A>.derive: <B>(lens: { get: (a: A) => B, set: (b: B, a: A) => A }) => Optic<B>;
 ```
 
@@ -15,7 +15,7 @@ Optic<A>.derive: <B>(lens: { get: (a: A) => B, set: (b: B, a: A) => A }) => Opti
 The `derive` method allows you to **derive a new optic from the current one** with a custom get and set function.
 
 - The `get` function is a simple **selector**, returning a new value derived from what the current optic is focused on.
-- The `set` function lets you to specify how to update the original value when the derived one is updated. It is optional, if you don't pass it the method returns a `ReadOptic`.
+- The `set` function lets you specify how to update the original value when the derived one is updated. It is optional, if you don't pass it the method returns a read-only Optic.
 
 :::tip
 
@@ -53,7 +53,7 @@ secondsOptic.set(60);
 millisecondsOptic.get(); // 60_000
 ```
 
-If you don't pass a `set` function you get a `ReadOptic`, an optic that can't be updated:
+If you don't pass a `set` function you get a read-only Optic:
 
 ```ts twoslash
 import { createState } from "@optics/react";

@@ -6,8 +6,8 @@ sidebar_position: 2
 # focusOn(value)
 
 ```ts
-function focusOn<T>(value: T): DataOptic<T, total, T>;
-function focusOn<T>(): PureOptic<T, total, T>;
+function focusOn<T>(value: T): DataOptic<T, {}, T>;
+function focusOn<T>(): PureOptic<T, {}, T>;
 ```
 
 Focus on a value to return a [`DataOptic`](../Guides/data_optic.mdx).

@@ -6,7 +6,7 @@ sidebar_position: 16
 # .get(): FocusedValue
 
 ```ts
-Optic<A, total>.get: () => A;
+Optic<A>.get: () => A;
 Optic<A, partial>.get: () => A | undefined;
 Optic<A, mapped>.get: () => A[];
 ```
